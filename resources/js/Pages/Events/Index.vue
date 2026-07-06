@@ -57,39 +57,80 @@ const monthLabel = computed(() =>
     new Date(cursor.value.year, cursor.value.month, 1).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })
 )
 
-// Mapa "año-mes-día" -> eventos, ordenados por hora
-const eventsByDay = computed(() => {
-    const map = {}
-    for (const e of props.events) {
-        const d = new Date(e.start_at)
-        const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`
-        ;(map[key] = map[key] ?? []).push(e)
-    }
-    for (const k in map) map[k].sort((a, b) => new Date(a.start_at) - new Date(b.start_at))
-    return map
-})
+const DAY_MS = 86400000
+const dayStart = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate())
 
-// Rejilla de 6 semanas (42 celdas) incluyendo días de meses colindantes
+// Rejilla de 6 semanas. Cada semana calcula las "barras" de eventos (con carriles),
+// de modo que los eventos de varios días se pintan como una barra continua.
 const weeks = computed(() => {
     const first = new Date(cursor.value.year, cursor.value.month, 1)
     const startOffset = (first.getDay() + 6) % 7 // lunes = 0
-    const start = new Date(cursor.value.year, cursor.value.month, 1 - startOffset)
+    const gridStart = dayStart(new Date(cursor.value.year, cursor.value.month, 1 - startOffset))
 
-    const cells = []
-    for (let i = 0; i < 42; i++) {
-        const d = new Date(start)
-        d.setDate(start.getDate() + i)
-        const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`
-        cells.push({
-            date: d,
-            day: d.getDate(),
-            inMonth: d.getMonth() === cursor.value.month,
-            isToday: key === todayKey,
-            events: eventsByDay.value[key] ?? [],
-        })
-    }
     const rows = []
-    for (let i = 0; i < 42; i += 7) rows.push(cells.slice(i, i + 7))
+    for (let wk = 0; wk < 6; wk++) {
+        const weekStart = new Date(gridStart)
+        weekStart.setDate(gridStart.getDate() + wk * 7)
+
+        const cells = []
+        for (let i = 0; i < 7; i++) {
+            const d = new Date(weekStart)
+            d.setDate(weekStart.getDate() + i)
+            const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`
+            cells.push({
+                day: d.getDate(),
+                inMonth: d.getMonth() === cursor.value.month,
+                isToday: key === todayKey,
+            })
+        }
+
+        const weekEndExcl = new Date(weekStart)
+        weekEndExcl.setDate(weekStart.getDate() + 7)
+
+        // Segmentos de eventos que intersectan esta semana.
+        const bars = []
+        for (const e of props.events) {
+            const eStart = dayStart(new Date(e.start_at))
+            const eEnd = dayStart(new Date(e.end_at ?? e.start_at))
+            if (eEnd < weekStart || eStart >= weekEndExcl) continue
+
+            const segStart = eStart < weekStart ? weekStart : eStart
+            const lastDay = new Date(weekEndExcl.getTime() - DAY_MS)
+            const segEnd = eEnd > lastDay ? lastDay : eEnd
+            const startCol = Math.round((segStart - weekStart) / DAY_MS)
+            const endCol = Math.round((segEnd - weekStart) / DAY_MS)
+
+            bars.push({
+                event: e,
+                startCol,
+                span: endCol - startCol + 1,
+                continuesLeft: eStart < weekStart,
+                continuesRight: eEnd > lastDay,
+                multiDay: eEnd.getTime() !== eStart.getTime(),
+                lane: 0,
+            })
+        }
+
+        // Asignación de carriles (greedy) para que no se solapen.
+        bars.sort((a, b) => a.startCol - b.startCol || b.span - a.span)
+        const lanes = []
+        for (const bar of bars) {
+            let lane = 0
+            for (;;) {
+                const occ = lanes[lane] ?? (lanes[lane] = [])
+                const end = bar.startCol + bar.span - 1
+                const clash = occ.some((o) => !(bar.startCol > o.end || end < o.start))
+                if (!clash) {
+                    occ.push({ start: bar.startCol, end })
+                    bar.lane = lane
+                    break
+                }
+                lane++
+            }
+        }
+
+        rows.push({ cells, bars, laneCount: Math.max(lanes.length, 2) })
+    }
     return rows
 })
 
@@ -183,40 +224,59 @@ const presentTypes = computed(() => [...new Set(props.events.map((e) => e.type))
 
             <!-- Rejilla -->
             <div>
-                <div v-for="(week, wi) in weeks" :key="wi" class="grid grid-cols-7 border-b border-ink-100 last:border-b-0">
+                <div
+                    v-for="(week, wi) in weeks"
+                    :key="wi"
+                    class="relative grid border-b border-ink-100 last:border-b-0"
+                    :style="{
+                        gridTemplateColumns: 'repeat(7, minmax(0, 1fr))',
+                        gridTemplateRows: `28px repeat(${week.laneCount}, 22px) 6px`,
+                    }"
+                >
+                    <!-- Fondos de celda (columna completa) -->
                     <div
-                        v-for="(cell, ci) in week"
-                        :key="ci"
-                        class="min-h-[92px] border-r border-ink-100 p-1.5 last:border-r-0 sm:min-h-[112px]"
+                        v-for="(cell, ci) in week.cells"
+                        :key="'bg-' + ci"
+                        class="border-r border-ink-100 last:border-r-0"
                         :class="cell.inMonth ? 'bg-white' : 'bg-ink-50/60'"
-                    >
-                        <div class="mb-1 flex justify-end">
-                            <span
-                                class="flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium"
-                                :class="cell.isToday
-                                    ? 'bg-brand-600 font-bold text-white'
-                                    : cell.inMonth ? 'text-ink-600' : 'text-ink-300'"
-                            >{{ cell.day }}</span>
-                        </div>
+                        :style="{ gridColumn: ci + 1, gridRow: '1 / -1' }"
+                    />
 
-                        <div class="space-y-1">
-                            <Link
-                                v-for="e in cell.events.slice(0, 3)"
-                                :key="e.id"
-                                :href="route('events.show', e.id)"
-                                class="block truncate rounded px-1.5 py-0.5 text-[11px] font-medium text-white transition hover:opacity-90"
-                                :style="{ backgroundColor: style(e.type).hex }"
-                                :title="`${e.title} · ${timeOf(e.start_at)}`"
-                            >
-                                <span class="opacity-90">{{ timeOf(e.start_at) }}</span> {{ e.title }}
-                            </Link>
-                            <Link
-                                v-if="cell.events.length > 3"
-                                :href="route('events.show', cell.events[3].id)"
-                                class="block px-1.5 text-[11px] font-medium text-ink-400 hover:text-ink-600"
-                            >+{{ cell.events.length - 3 }} más</Link>
-                        </div>
+                    <!-- Números de día -->
+                    <div
+                        v-for="(cell, ci) in week.cells"
+                        :key="'num-' + ci"
+                        class="z-10 flex justify-end p-1"
+                        :style="{ gridColumn: ci + 1, gridRow: 1 }"
+                    >
+                        <span
+                            class="flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium"
+                            :class="cell.isToday ? 'bg-brand-600 font-bold text-white' : cell.inMonth ? 'text-ink-600' : 'text-ink-300'"
+                        >{{ cell.day }}</span>
                     </div>
+
+                    <!-- Barras de eventos -->
+                    <Link
+                        v-for="bar in week.bars"
+                        :key="bar.event.id + '-' + wi"
+                        :href="route('events.show', bar.event.id)"
+                        class="z-10 mx-0.5 flex items-center gap-1 overflow-hidden whitespace-nowrap px-1.5 text-[11px] font-medium text-white transition hover:opacity-90"
+                        :class="[
+                            bar.continuesLeft ? 'rounded-l-none' : 'rounded-l',
+                            bar.continuesRight ? 'rounded-r-none' : 'rounded-r',
+                        ]"
+                        :style="{
+                            gridColumn: `${bar.startCol + 1} / span ${bar.span}`,
+                            gridRow: bar.lane + 2,
+                            backgroundColor: style(bar.event.type).hex,
+                        }"
+                        :title="`${bar.event.title} · ${formatDate(bar.event.start_at)}`"
+                    >
+                        <span v-if="bar.continuesLeft">‹</span>
+                        <span v-if="!bar.multiDay" class="opacity-90">{{ timeOf(bar.event.start_at) }}</span>
+                        <span class="truncate">{{ bar.event.title }}</span>
+                        <span v-if="bar.continuesRight" class="ml-auto">›</span>
+                    </Link>
                 </div>
             </div>
         </div>
