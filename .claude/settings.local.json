@@ -5,7 +5,8 @@
       "Bash(docker compose *)",
       "Bash(docker stop *)",
       "Bash(docker rm *)",
-      "Bash(grep -rn '$inertia\\\\|router\\\\.get\\\\|import.*router' resources/js/Pages resources/js/Layouts)"
+      "Bash(grep -rn '$inertia\\\\|router\\\\.get\\\\|import.*router' resources/js/Pages resources/js/Layouts)",
+      "Bash(curl -s -o /dev/null -w \"home: %{time_total}s\\\\n\" http://localhost:8000/)"
     ]
   }
 }

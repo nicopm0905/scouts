@@ -7,6 +7,7 @@ services:
     container_name: scouts_app
     volumes:
       - .:/var/www/html
+      - ./docker/app/opcache.ini:/usr/local/etc/php/conf.d/zz-opcache.ini:ro
     ports:
       - "8000:8000"
     depends_on:
