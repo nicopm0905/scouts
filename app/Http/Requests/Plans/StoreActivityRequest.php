@@ -1,0 +1,32 @@
+<?php
+
+namespace App\Http\Requests\Plans;
+
+use App\Enums\MemberRole;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+
+class StoreActivityRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return $this->user()->can('create', \App\Models\Activity::class);
+    }
+
+    public function rules(): array
+    {
+        return [
+            'title' => ['required', 'string', 'max:255'],
+            'branch' => ['nullable', Rule::in(MemberRole::values())],
+            'duration_minutes' => ['nullable', 'integer', 'min:1'],
+            'objectives_text' => ['nullable', 'string'],
+            'development' => ['nullable', 'string'],
+            'attachments' => ['nullable', 'array'],
+            'attachments.*' => ['file', 'max:20480'],
+            'materials' => ['nullable', 'array'],
+            'materials.*.name' => ['required_with:materials', 'string', 'max:255'],
+            'materials.*.quantity' => ['nullable', 'integer', 'min:1'],
+            'materials.*.inventory_item_id' => ['nullable', 'exists:inventory_items,id'],
+        ];
+    }
+}

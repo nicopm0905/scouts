@@ -26,6 +26,7 @@ class User extends Authenticatable
         'password',
         'branches',
         'active',
+        'ical_token',
     ];
 
     /**
@@ -81,5 +82,18 @@ class User extends Authenticatable
     public function managesBranch(string $branch): bool
     {
         return $this->canSeeAllBranches() || in_array($branch, $this->branches ?? [], true);
+    }
+
+    /**
+     * Token personal para suscribirse en modo solo lectura al calendario de eventos
+     * (Agente C). Se genera perezosamente la primera vez que se necesita.
+     */
+    public function ensureIcalToken(): string
+    {
+        if (empty($this->ical_token)) {
+            $this->forceFill(['ical_token' => \Illuminate\Support\Str::random(48)])->save();
+        }
+
+        return $this->ical_token;
     }
 }
