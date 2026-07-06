@@ -16,6 +16,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/cobros', [ChargeController::class, 'index'])->name('charges.index');
     Route::post('/cobros', [ChargeController::class, 'store'])->name('charges.store');
     Route::get('/cobros/{charge}', [ChargeController::class, 'show'])->name('charges.show');
+    Route::post('/cobros/{charge}/recordar', [ChargeController::class, 'remind'])->name('charges.remind');
     Route::delete('/cobros/{charge}', [ChargeController::class, 'destroy'])->name('charges.destroy');
 
     Route::post('/cobros/reparto/{chargeMember}/marcar-pagado', [ChargeMemberController::class, 'markPaid'])
