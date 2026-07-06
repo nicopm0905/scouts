@@ -39,6 +39,7 @@ class DemoSeeder extends Seeder
         $members = $this->createMembers();
         $this->createFamilies($members);
         $this->createCharges($members);
+        $this->createCalendarEvents();
         $this->createNonCompliantCamp($members, $leaders);
         Activity::factory()->count(20)->create();
         InventoryItem::factory()->count(28)->create();
@@ -185,6 +186,58 @@ class DemoSeeder extends Seeder
                 'status' => fake()->randomElement([ChargeStatus::Paid->value, ChargeStatus::Pending->value]),
             ]);
         }
+    }
+
+    /** Eventos variados repartidos por el calendario (reuniones semanales, salidas, consejos). */
+    private function createCalendarEvents(): void
+    {
+        $allBranches = MemberRole::values();
+
+        // Reuniones semanales de grupo: sábados por la tarde, de -4 a +8 semanas.
+        $saturday = now()->startOfWeek()->addDays(5)->setTime(17, 0);
+        for ($w = -4; $w <= 8; $w++) {
+            $start = (clone $saturday)->addWeeks($w);
+            Event::create([
+                'title' => 'Reunión de grupo',
+                'type' => EventType::Reunion,
+                'start_at' => $start,
+                'end_at' => (clone $start)->addHours(2),
+                'location' => 'Local del grupo',
+                'description' => 'Reunión semanal de todas las ramas.',
+                'branches' => $allBranches,
+            ]);
+        }
+
+        // Un par de salidas y un consejo de grupo alrededor de hoy.
+        Event::create([
+            'title' => 'Salida de senderismo',
+            'type' => EventType::Salida,
+            'start_at' => now()->addDays(9)->setTime(9, 0),
+            'end_at' => now()->addDays(9)->setTime(18, 30),
+            'location' => 'Sierra Norte',
+            'description' => 'Salida de día para rangers y pioneros.',
+            'branches' => [MemberRole::Ranger->value, MemberRole::Pionero->value],
+        ]);
+
+        Event::create([
+            'title' => 'Acampada de otoño',
+            'type' => EventType::Acampada,
+            'start_at' => now()->addDays(18)->setTime(16, 0),
+            'end_at' => now()->addDays(20)->setTime(13, 0),
+            'location' => 'Albergue El Robledal',
+            'description' => 'Acampada de fin de semana de lobatos.',
+            'branches' => [MemberRole::Lobato->value],
+        ]);
+
+        Event::create([
+            'title' => 'Consejo de grupo',
+            'type' => EventType::ConsejoGrupo,
+            'start_at' => now()->addDays(3)->setTime(20, 0),
+            'end_at' => now()->addDays(3)->setTime(21, 30),
+            'location' => 'Local del grupo',
+            'description' => 'Reunión mensual del equipo de responsables.',
+            'branches' => [],
+        ]);
     }
 
     /** Campamento con inscripciones que NO cumple ratio (para el validador). */
