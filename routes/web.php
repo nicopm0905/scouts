@@ -24,4 +24,14 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+/*
+| Autocarga de rutas por feature. Cada agente crea su propio fichero en
+| routes/features/<feature>.php y NO edita este archivo (evita conflictos).
+| Las rutas autenticadas van dentro del grupo 'auth'; las públicas tokenizadas
+| pueden registrarse fuera dentro del propio fichero del feature.
+*/
+foreach (glob(__DIR__.'/features/*.php') as $featureRoutes) {
+    require $featureRoutes;
+}
+
 require __DIR__.'/auth.php';
