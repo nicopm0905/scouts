@@ -1,66 +1,189 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Plataforma de gestión — Grupo Scout (MSC Andalucía)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplicación web para la gestión integral de un grupo scout del Movimiento Scout Católico:
+miembros y familias, tesorería, calendario y eventos (con validación legal de ratios),
+secretaría (documentos y actas), planes de rama y actividades, inventario, fotos e historia.
+Objetivo: **ahorrar tiempo a los responsables voluntarios** — cada flujo en el mínimo de clics,
+móvil primero.
 
-## About Laravel
+## Stack
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Backend:** Laravel 11 (PHP 8.3), PostgreSQL 16
+- **Frontend:** Vue 3 + Inertia.js + Tailwind CSS (SPA, SSR desactivado)
+- **Auth y permisos:** Laravel Breeze + spatie/laravel-permission
+- **Auditoría:** spatie/laravel-activitylog (accesos a fichas de menores)
+- **PDF:** barryvdh/laravel-dompdf (facturas, recibos, listados, circulares, actas)
+- **Almacenamiento:** Google Drive (service account) vía `DriveServiceInterface`. Los ficheros
+  NO se guardan en el servidor: solo metadatos y `file_id`. Driver `fake` para local/tests.
+- **Colas y scheduler:** Laravel queues (driver database), cron → `schedule:run`
+- **Tests:** Pest (SQLite en memoria)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Idioma: **UI en español**, código y base de datos en inglés.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## Puesta en marcha con Docker (recomendado)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Requisitos: Docker Desktop.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+```bash
+# 1. Clonar y entrar
+git clone <repo> scouts && cd scouts
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+# 2. Copiar variables de entorno
+cp .env.example .env          # revisa credenciales de Drive (abajo)
 
-## Laravel Sponsors
+# 3. Construir e iniciar (app en :8000, vite en :5173, postgres en :5433)
+docker compose build
+docker compose up -d db
+docker compose run --rm app php artisan key:generate
+docker compose run --rm app php artisan migrate --seed   # datos de demo realistas
+docker compose up -d app vite queue
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+# App disponible en http://localhost:8000
+```
 
-### Premium Partners
+> En Windows/Git Bash, antepón `export MSYS_NO_PATHCONV=1` para evitar la conversión de rutas.
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+### Usuarios de demostración (contraseña `password`)
 
-## Contributing
+| Email | Rol |
+|-------|-----|
+| admin@grupo.test | Coordinación (todo) |
+| secretaria@grupo.test | Secretaría |
+| tesoreria@grupo.test | Tesorería |
+| lobatos@grupo.test | Responsable (rama Lobatos) |
+| pioneros@grupo.test | Responsable (rama Pioneros) |
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Los datos de demo incluyen ~71 miembros, 8 responsables, 3 familias, un **campamento que
+no cumple la ratio legal** (para ver el validador en rojo), cobros mixtos, 20 actividades y
+30 ítems de inventario.
 
-## Code of Conduct
+### Comandos útiles (contenedor)
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+docker compose run --rm app php artisan test          # suite Pest
+docker compose run --rm app php artisan migrate:fresh --seed
+docker compose run --rm app php artisan schedule:list
+docker compose exec app php artisan tinker
+```
 
-## Security Vulnerabilities
+---
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Instalación nativa (sin Docker)
 
-## License
+Requiere PHP 8.3 (ext: pdo_pgsql, mbstring, gd, zip, intl, bcmath), Composer 2, Node 20+,
+PostgreSQL 15+.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+composer install
+npm install && npm run build
+cp .env.example .env && php artisan key:generate
+# configura DB_* en .env apuntando a tu Postgres
+php artisan migrate --seed
+php artisan serve         # y en otra terminal: npm run dev
+```
+
+---
+
+## Configuración de Google Drive (producción)
+
+El almacenamiento usa una **cuenta de servicio** de Google Cloud con la API de Drive habilitada.
+
+1. En Google Cloud Console: crea un proyecto, habilita **Google Drive API**, crea una
+   **cuenta de servicio** y descarga su clave JSON.
+2. En Google Drive, crea una carpeta raíz y **compártela** (editor) con el email de la cuenta
+   de servicio (`...@...iam.gserviceaccount.com`). Copia el ID de la carpeta (de su URL).
+3. Configura en `.env`:
+
+```dotenv
+DRIVE_DRIVER=google
+GOOGLE_DRIVE_SERVICE_ACCOUNT_JSON=/ruta/segura/credenciales.json   # ruta al fichero o el JSON en crudo
+GOOGLE_DRIVE_ROOT_FOLDER_ID=xxxxxxxxxxxxxxxxxxxxx
+```
+
+En local y en los tests se usa `DRIVE_DRIVER=fake` (no toca la red). La implementación real
+(`app/Services/Drive/GoogleDriveService.php`) usa la API REST + un JWT de cuenta de servicio
+(`firebase/php-jwt`), sin el SDK pesado. Para cambiar de proveedor, implementa
+`DriveServiceInterface` y ajusta el binding en `DriveServiceProvider`.
+
+---
+
+## Colas y tareas programadas (scheduler)
+
+**Cola** (emails, sincronización con Drive):
+
+```bash
+php artisan queue:work --tries=3    # en Docker ya corre el servicio "queue"
+```
+
+**Cron** (una sola línea en el servidor ejecuta todo el scheduler):
+
+```cron
+* * * * * cd /ruta/al/proyecto && php artisan schedule:run >> /dev/null 2>&1
+```
+
+Tareas programadas (ver `routes/console.php`):
+
+- `charges:send-reminders` — recordatorios de pago (X días antes del vencimiento y al vencer). Diario 08:00.
+- `alerts:expiry` — avisos de documentos, certificados de delitos sexuales e inventario próximos a caducar/revisar. Diario 08:15.
+
+Configura el correo (`MAIL_*`) en `.env` para el envío real.
+
+---
+
+## Despliegue en VPS con Laravel Forge
+
+1. Servidor con PHP 8.3 + PostgreSQL. Crea un sitio y conecta el repositorio.
+2. Variables de entorno del panel: `APP_*`, `DB_*`, `MAIL_*`, `DRIVE_*` (ver arriba).
+3. Script de despliegue:
+   ```bash
+   composer install --no-dev --optimize-autoloader
+   php artisan migrate --force
+   npm ci && npm run build
+   php artisan config:cache && php artisan route:cache
+   php artisan queue:restart
+   ```
+4. Activa el **Scheduler** de Forge (equivale al cron de arriba) y un **worker de cola**
+   (Daemon: `php artisan queue:work --tries=3`).
+
+---
+
+## Roles y permisos
+
+| Rol | Alcance |
+|-----|---------|
+| `admin` (coordinación) | Todo |
+| `secretaria` | Miembros, documentos, actas, censo, calendario, fotos/historia |
+| `tesoreria` | Cobros, pagos, facturas, informes económicos, ajustes fiscales |
+| `responsable` | Solo su(s) rama(s): miembros (sin datos sensibles de otras ramas), asistencia, plan de rama, actividades, inventario (lectura + reservas), eventos de su rama |
+| `familia` (fase 2) | Preparado: ver/pagar cobros, autorizaciones, calendario, circulares |
+
+La autorización se aplica con **policies** en todos los recursos. El scope por rama del rol
+`responsable` se implementa en `Member::scopeVisibleTo()` y las policies. Los accesos a datos
+sensibles de menores (ficha médica, consentimientos) se registran con activitylog.
+
+## Validación legal de actividades (Andalucía)
+
+`app/Services/CampRatio/CampRatioValidator.php` implementa las ratios de los Decretos 45/2000
+y 89/2018: 1 responsable por cada 10 participantes (mayoría < 12 años) o por cada 15 (≥ 12),
+al menos un **director**, máximo 33% de responsables en prácticas, y avisos por certificados de
+delitos sexuales caducados/ausentes. Resultado en semáforo ✅/⚠️/❌ en la página del evento.
+
+---
+
+## Estructura y convenciones
+
+Ver **`CONVENTIONS.md`** (rutas por feature autocargadas desde `routes/features/*.php`,
+componentes compartidos en `resources/js/Components/Shared/`, textos en `lang/es/`, tests Pest
+por módulo). Cambios aditivos al esquema documentados en **`CHANGES.md`**.
+
+## Tests
+
+```bash
+docker compose run --rm app php artisan test           # toda la suite
+docker compose run --rm app php artisan test tests/Feature/Members   # un módulo
+```
+
+Los tests usan SQLite en memoria y el `FakeDriveService` (sin red). Incluyen pruebas de
+autorización cruzada (un `responsable` de otra rama recibe 403) en cada módulo.
