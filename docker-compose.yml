@@ -1,0 +1,74 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+    image: scouts-app:latest
+    container_name: scouts_app
+    volumes:
+      - .:/var/www/html
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: scouts
+      DB_USERNAME: scouts
+      DB_PASSWORD: secret
+    command: sh -c "php artisan serve --host=0.0.0.0 --port=8000"
+
+  vite:
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+    image: scouts-app:latest
+    container_name: scouts_vite
+    volumes:
+      - .:/var/www/html
+    ports:
+      - "5173:5173"
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+
+  queue:
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+    image: scouts-app:latest
+    container_name: scouts_queue
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: scouts
+      DB_USERNAME: scouts
+      DB_PASSWORD: secret
+    command: sh -c "php artisan queue:work --tries=3 --sleep=3"
+
+  db:
+    image: postgres:16
+    container_name: scouts_db
+    environment:
+      POSTGRES_DB: scouts
+      POSTGRES_USER: scouts
+      POSTGRES_PASSWORD: secret
+    ports:
+      - "5433:5432"
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U scouts -d scouts"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  dbdata:
