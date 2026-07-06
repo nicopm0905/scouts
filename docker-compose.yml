@@ -21,7 +21,11 @@ services:
       DB_PASSWORD: secret
     command: sh -c "php artisan serve --host=0.0.0.0 --port=8000"
 
+  # Servidor de desarrollo de Vite (Hot Module Replacement). NO arranca por defecto:
+  # solo con `docker compose --profile dev up vite`. Así el `docker compose up` normal
+  # sirve los assets ya compilados (public/build) y no crea public/hot.
   vite:
+    profiles: ["dev"]
     build:
       context: .
       dockerfile: docker/app/Dockerfile
