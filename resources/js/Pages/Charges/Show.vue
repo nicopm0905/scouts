@@ -70,7 +70,7 @@ const paidCount = computed(() => props.assignments.filter((a) => a.status === 'p
                     </Link>
                     <button
                         v-if="can('charges.manage') && row.status !== 'paid'"
-                        class="rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700"
+                        class="rounded-md bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-700"
                         @click="openPay(row)"
                     >
                         Marcar pagado
@@ -91,7 +91,7 @@ const paidCount = computed(() => props.assignments.filter((a) => a.status === 'p
                     Cancelar
                 </button>
                 <button
-                    class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                    class="rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
                     :disabled="payForm.processing"
                     @click="markPaid"
                 >

@@ -25,7 +25,7 @@ const btn =
     <span>
         <button type="button" @click="open = true">
             <slot>
-                <span :class="[btn, variant === 'danger' ? 'bg-red-600 hover:bg-red-700' : 'bg-emerald-600 hover:bg-emerald-700']">
+                <span :class="[btn, variant === 'danger' ? 'bg-brand-600 hover:bg-brand-700' : 'bg-brand-600 hover:bg-brand-700']">
                     {{ confirmLabel }}
                 </span>
             </slot>
@@ -43,7 +43,7 @@ const btn =
                 </button>
                 <button
                     type="button"
-                    :class="[btn, variant === 'danger' ? 'bg-red-600 hover:bg-red-700' : 'bg-emerald-600 hover:bg-emerald-700']"
+                    :class="[btn, variant === 'danger' ? 'bg-brand-600 hover:bg-brand-700' : 'bg-brand-600 hover:bg-brand-700']"
                     @click="confirm"
                 >
                     {{ confirmLabel }}

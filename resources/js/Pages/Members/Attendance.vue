@@ -62,7 +62,7 @@ function save() {
                 :key="b.value"
                 type="button"
                 class="rounded-full border px-4 py-1.5 text-sm font-medium"
-                :class="branch === b.value ? 'border-emerald-600 bg-emerald-50 text-emerald-700' : 'border-slate-300 text-slate-600'"
+                :class="branch === b.value ? 'border-brand-600 bg-brand-50 text-brand-700' : 'border-slate-300 text-slate-600'"
                 @click="changeFilters(b.value)"
             >
                 {{ b.label }}
@@ -70,7 +70,7 @@ function save() {
         </div>
 
         <div class="mb-3 flex gap-2">
-            <button class="text-sm text-emerald-700 hover:underline" @click="markAll(true)">Marcar todos presentes</button>
+            <button class="text-sm text-brand-700 hover:underline" @click="markAll(true)">Marcar todos presentes</button>
             <button class="text-sm text-slate-500 hover:underline" @click="markAll(false)">Marcar todos ausentes</button>
         </div>
 
@@ -80,7 +80,7 @@ function save() {
                 :key="row.member_id"
                 type="button"
                 class="flex items-center justify-between rounded-lg border px-4 py-3 text-left text-sm font-medium shadow-sm transition"
-                :class="row.present ? 'border-emerald-600 bg-emerald-50 text-emerald-800' : 'border-slate-200 bg-white text-slate-600'"
+                :class="row.present ? 'border-brand-600 bg-brand-50 text-brand-800' : 'border-slate-200 bg-white text-slate-600'"
                 @click="toggle(row)"
             >
                 <span>{{ members.find((m) => m.id === row.member_id)?.full_name }}</span>
@@ -92,7 +92,7 @@ function save() {
 
         <div class="sticky bottom-4 mt-6 flex justify-end">
             <button
-                class="rounded-md bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-lg hover:bg-emerald-700 disabled:opacity-50"
+                class="rounded-md bg-brand-600 px-6 py-3 text-sm font-semibold text-white shadow-lg hover:bg-brand-700 disabled:opacity-50"
                 :disabled="form.processing || !form.attendance.length"
                 @click="save"
             >

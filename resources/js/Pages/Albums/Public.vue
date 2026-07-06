@@ -11,7 +11,7 @@ defineProps({
 
     <div class="min-h-screen bg-slate-100">
         <header class="border-b border-slate-200 bg-white px-4 py-5 sm:px-8">
-            <h1 class="text-xl font-bold text-emerald-800 sm:text-2xl">⚜️ Galería del grupo</h1>
+            <h1 class="text-xl font-bold text-brand-800 sm:text-2xl">⚜️ Galería del grupo</h1>
             <p class="mt-1 text-sm text-slate-500">Fotos con consentimiento de imagen para difusión pública.</p>
         </header>
 

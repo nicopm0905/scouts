@@ -69,7 +69,7 @@ function destroy(member) {
                 <Link
                     v-if="canManage"
                     :href="route('members.create')"
-                    class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                    class="rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
                 >
                     + Nuevo miembro
                 </Link>
@@ -83,13 +83,13 @@ function destroy(member) {
                     <option v-for="b in branches" :key="b.value" :value="b.value">{{ b.label }}</option>
                 </select>
                 <label class="flex items-center gap-2 text-sm text-slate-600">
-                    <input v-model="onlyActive" type="checkbox" class="rounded border-slate-300 text-emerald-600" />
+                    <input v-model="onlyActive" type="checkbox" class="rounded border-slate-300 text-brand-600" />
                     Solo activos
                 </label>
             </template>
 
             <template #cell-full_name="{ row }">
-                <Link :href="route('members.show', row.id)" class="font-medium text-emerald-700 hover:underline">
+                <Link :href="route('members.show', row.id)" class="font-medium text-brand-700 hover:underline">
                     {{ row.full_name }}
                 </Link>
             </template>
@@ -98,7 +98,7 @@ function destroy(member) {
             </template>
             <template #actions="{ row }">
                 <div class="flex justify-end gap-3">
-                    <Link :href="route('members.show', row.id)" class="text-emerald-700 hover:underline">Ver</Link>
+                    <Link :href="route('members.show', row.id)" class="text-brand-700 hover:underline">Ver</Link>
                     <Link v-if="canManage" :href="route('members.edit', row.id)" class="text-slate-600 hover:underline">Editar</Link>
                     <ConfirmButton
                         v-if="canManage"

@@ -181,7 +181,7 @@ function submitCharge() {
                                     <td class="py-2 pr-3">{{ en.role_label }}</td>
                                     <td class="py-2 pr-3">
                                         <label class="inline-flex items-center gap-1.5">
-                                            <input type="checkbox" :checked="en.enrolled" @change="toggleEnrolled(en)" class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" />
+                                            <input type="checkbox" :checked="en.enrolled" @change="toggleEnrolled(en)" class="rounded border-slate-300 text-brand-600 focus:ring-brand-500" />
                                         </label>
                                     </td>
                                     <td class="py-2 pr-3">
@@ -190,7 +190,7 @@ function submitCharge() {
                                         <BadgeEstado v-else label="Pendiente" color="gray" />
                                     </td>
                                     <td class="py-2 pr-3">
-                                        <button type="button" class="text-xs text-emerald-700 hover:underline" @click="copyLink(en.public_url)">
+                                        <button type="button" class="text-xs text-brand-700 hover:underline" @click="copyLink(en.public_url)">
                                             Copiar enlace
                                         </button>
                                     </td>
@@ -211,14 +211,14 @@ function submitCharge() {
                     <ul class="space-y-2">
                         <li v-for="item in checklistItems" :key="item.id" class="flex items-center justify-between gap-2">
                             <label class="flex items-center gap-2 text-sm text-slate-700">
-                                <input type="checkbox" :checked="item.done" @change="toggleChecklist(item)" class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" />
+                                <input type="checkbox" :checked="item.done" @change="toggleChecklist(item)" class="rounded border-slate-300 text-brand-600 focus:ring-brand-500" />
                                 <span :class="item.done ? 'line-through text-slate-400' : ''">{{ item.label }}</span>
                             </label>
                             <button type="button" class="text-xs text-slate-400 hover:text-red-600" @click="removeChecklistItem(item)">✕</button>
                         </li>
                     </ul>
                     <div class="mt-3 flex gap-2">
-                        <input v-model="newChecklistLabel" type="text" placeholder="Nuevo punto…" class="flex-1 rounded-md border-slate-300 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500" @keyup.enter="addChecklistItem" />
+                        <input v-model="newChecklistLabel" type="text" placeholder="Nuevo punto…" class="flex-1 rounded-md border-slate-300 text-sm shadow-sm focus:border-brand-500 focus:ring-brand-500" @keyup.enter="addChecklistItem" />
                         <button type="button" class="rounded-md border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50" @click="addChecklistItem">Añadir</button>
                     </div>
                 </section>
@@ -251,7 +251,7 @@ function submitCharge() {
                     <button
                         v-if="can.update"
                         type="button"
-                        class="w-full rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                        class="w-full rounded-md bg-brand-600 px-3 py-2 text-sm font-semibold text-white hover:bg-brand-700"
                         @click="showChargeModal = true"
                     >
                         + Generar cobro
@@ -271,7 +271,7 @@ function submitCharge() {
                 <button type="button" class="rounded-md px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100" @click="showChargeModal = false">
                     Cancelar
                 </button>
-                <button type="button" class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700" :disabled="chargeForm.processing" @click="submitCharge">
+                <button type="button" class="rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700" :disabled="chargeForm.processing" @click="submitCharge">
                     Crear cobro
                 </button>
             </template>

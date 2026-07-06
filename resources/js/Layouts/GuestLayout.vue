@@ -1,22 +1,23 @@
 <script setup>
-import ApplicationLogo from '@/Components/ApplicationLogo.vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3'
+
+const page = usePage()
 </script>
 
 <template>
-    <div
-        class="flex min-h-screen flex-col items-center bg-gray-100 pt-6 sm:justify-center sm:pt-0"
-    >
-        <div>
-            <Link href="/">
-                <ApplicationLogo class="h-20 w-20 fill-current text-gray-500" />
-            </Link>
-        </div>
+    <div class="flex min-h-screen flex-col items-center justify-center bg-ink-100 px-4 py-8">
+        <Link href="/" class="mb-6 flex items-center gap-3">
+            <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-600 text-2xl text-white shadow-card">⚜</span>
+            <div class="leading-tight">
+                <p class="text-lg font-bold text-ink-900">{{ page.props.app?.name ?? 'Grupo Scout' }}</p>
+                <p class="text-xs text-ink-400">Plataforma de gestión</p>
+            </div>
+        </Link>
 
-        <div
-            class="mt-6 w-full overflow-hidden bg-white px-6 py-4 shadow-md sm:max-w-md sm:rounded-lg"
-        >
+        <div class="w-full overflow-hidden rounded-2xl border border-ink-200 bg-white px-7 py-8 shadow-card sm:max-w-md">
             <slot />
         </div>
+
+        <p class="mt-6 text-xs text-ink-400">Movimiento Scout Católico · Andalucía</p>
     </div>
 </template>

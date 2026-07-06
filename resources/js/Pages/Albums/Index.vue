@@ -63,7 +63,7 @@ function destroyAlbum(album) {
                 <button
                     v-if="can('photos.manage')"
                     type="button"
-                    class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                    class="rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
                     @click="showCreate = true"
                 >
                     Nuevo álbum
@@ -92,7 +92,7 @@ function destroyAlbum(album) {
                     </div>
                     <span
                         class="rounded-full px-2 py-0.5 text-xs font-medium"
-                        :class="album.visibility === 'publishable' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'"
+                        :class="album.visibility === 'publishable' ? 'bg-brand-100 text-brand-700' : 'bg-slate-100 text-slate-600'"
                     >
                         {{ album.visibility === 'publishable' ? 'Publicable' : 'Interno' }}
                     </span>
@@ -144,7 +144,7 @@ function destroyAlbum(album) {
                 </button>
                 <button
                     type="button"
-                    class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                    class="rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
                     :disabled="form.processing"
                     @click="submit"
                 >

@@ -21,7 +21,7 @@ const value = computed({
 })
 
 const inputClasses =
-    'mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 text-sm'
+    'mt-1 block w-full rounded-lg border-ink-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm'
 </script>
 
 <template>
@@ -52,7 +52,7 @@ const inputClasses =
             <input
                 type="checkbox"
                 v-model="value"
-                class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                class="rounded border-ink-300 text-brand-600 focus:ring-brand-500"
             />
             <span class="text-sm text-slate-600">{{ placeholder }}</span>
         </label>

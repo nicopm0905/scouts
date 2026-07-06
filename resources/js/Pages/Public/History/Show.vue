@@ -11,7 +11,7 @@ defineProps({
 
     <div class="min-h-screen bg-slate-100">
         <header class="border-b border-slate-200 bg-white px-4 py-5 sm:px-8">
-            <h1 class="text-xl font-bold text-emerald-800 sm:text-2xl">⚜️ Nuestra historia</h1>
+            <h1 class="text-xl font-bold text-brand-800 sm:text-2xl">⚜️ Nuestra historia</h1>
             <p class="mt-1 text-sm text-slate-500">Un recorrido por los momentos más destacados del grupo.</p>
         </header>
 
@@ -20,10 +20,10 @@ defineProps({
                 Próximamente la historia del grupo.
             </p>
 
-            <ol v-else class="relative space-y-8 border-l-2 border-emerald-200 pl-6">
+            <ol v-else class="relative space-y-8 border-l-2 border-brand-200 pl-6">
                 <li v-for="entry in entries" :key="entry.id" class="relative">
-                    <span class="absolute -left-[1.65rem] top-1 h-3 w-3 rounded-full bg-emerald-600"></span>
-                    <span class="text-sm font-bold text-emerald-700">{{ entry.year }}</span>
+                    <span class="absolute -left-[1.65rem] top-1 h-3 w-3 rounded-full bg-brand-600"></span>
+                    <span class="text-sm font-bold text-brand-700">{{ entry.year }}</span>
                     <h2 class="text-lg font-semibold text-slate-800">{{ entry.title }}</h2>
                     <img
                         v-if="entry.photo_url"

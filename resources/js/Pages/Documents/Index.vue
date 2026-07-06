@@ -89,7 +89,7 @@ function remove(document) {
                 <button
                     v-if="can.manage"
                     type="button"
-                    class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700"
+                    class="rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-700"
                     @click="openCreate(openCategory)"
                 >
                     + Subir documento
@@ -171,7 +171,7 @@ function remove(document) {
                     <button
                         v-if="can.manage"
                         type="button"
-                        class="mt-3 text-xs font-semibold text-emerald-700 hover:underline"
+                        class="mt-3 text-xs font-semibold text-brand-700 hover:underline"
                         @click="openCreate(cat.value)"
                     >
                         + Subir documento en {{ cat.label }}
@@ -212,7 +212,7 @@ function remove(document) {
                 </button>
                 <button
                     type="button"
-                    class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+                    class="rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
                     :disabled="form.processing"
                     @click="submit"
                 >

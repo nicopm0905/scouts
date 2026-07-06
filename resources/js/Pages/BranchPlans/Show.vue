@@ -90,7 +90,7 @@ function badgeColor(status) {
         <template #actions>
             <button
                 v-if="canManage"
-                class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                class="rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
                 @click="openCreate"
             >
                 + Añadir objetivo
@@ -102,7 +102,7 @@ function badgeColor(status) {
         <p class="mb-2 text-sm font-medium text-slate-600">Progreso general (base de memoria anual)</p>
         <div class="flex items-center gap-3">
             <div class="h-3 w-full max-w-md overflow-hidden rounded-full bg-slate-200">
-                <div class="h-full bg-emerald-500" :style="{ width: plan.completion_percentage + '%' }" />
+                <div class="h-full bg-brand-500" :style="{ width: plan.completion_percentage + '%' }" />
             </div>
             <span class="text-sm font-semibold text-slate-700">{{ plan.completion_percentage }}%</span>
         </div>
@@ -125,7 +125,7 @@ function badgeColor(status) {
                     <div class="mt-2 flex items-center justify-between">
                         <BadgeEstado :label="o.status_label" :color="badgeColor(o.status)" />
                         <div v-if="canManage" class="flex gap-2">
-                            <button class="text-xs text-emerald-700 hover:underline" @click="openEdit(o)">Editar</button>
+                            <button class="text-xs text-brand-700 hover:underline" @click="openEdit(o)">Editar</button>
                             <ConfirmButton
                                 message="¿Eliminar este objetivo?"
                                 confirm-label="Eliminar"
@@ -151,7 +151,7 @@ function badgeColor(status) {
             <button class="rounded-md px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100" @click="showObjectiveModal = false">
                 Cancelar
             </button>
-            <button class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700" @click="submit">
+            <button class="rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700" @click="submit">
                 Guardar
             </button>
         </template>

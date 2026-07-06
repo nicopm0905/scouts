@@ -49,7 +49,7 @@ function submit() {
         <template #actions>
             <button
                 v-if="canManage"
-                class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                class="rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
                 @click="showCreate = true"
             >
                 + Nuevo plan
@@ -61,13 +61,13 @@ function submit() {
         <template #cell-completion_percentage="{ row }">
             <div class="flex items-center gap-2">
                 <div class="h-2 w-32 overflow-hidden rounded-full bg-slate-200">
-                    <div class="h-full bg-emerald-500" :style="{ width: row.completion_percentage + '%' }" />
+                    <div class="h-full bg-brand-500" :style="{ width: row.completion_percentage + '%' }" />
                 </div>
                 <span class="text-xs text-slate-500">{{ row.completion_percentage }}%</span>
             </div>
         </template>
         <template #actions="{ row }">
-            <Link :href="route('branch-plans.show', row.id)" class="text-emerald-700 hover:underline">Ver</Link>
+            <Link :href="route('branch-plans.show', row.id)" class="text-brand-700 hover:underline">Ver</Link>
         </template>
         <template #empty>Todavía no hay planes de rama creados.</template>
     </DataTable>
@@ -101,7 +101,7 @@ function submit() {
                 Cancelar
             </button>
             <button
-                class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                class="rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
                 :disabled="form.processing"
                 @click="submit"
             >

@@ -63,13 +63,13 @@ function formatDate(iso) {
             </p>
 
             <div class="mt-4">
-                <div v-if="enrolled" class="rounded-md bg-emerald-50 p-3 text-sm text-emerald-800">
+                <div v-if="enrolled" class="rounded-md bg-brand-50 p-3 text-sm text-brand-800">
                     ✅ Inscripción confirmada{{ confirmed_at ? ' el ' + formatDate(confirmed_at) : '' }}.
                 </div>
                 <button
                     v-else
                     type="button"
-                    class="w-full rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+                    class="w-full rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
                     :disabled="confirming"
                     @click="confirmEnrollment"
                 >
@@ -79,7 +79,7 @@ function formatDate(iso) {
 
             <div class="mt-6 border-t border-slate-100 pt-4">
                 <h3 class="text-sm font-semibold text-slate-700">Autorización firmada</h3>
-                <p v-if="has_authorization" class="mt-1 text-sm text-emerald-700">
+                <p v-if="has_authorization" class="mt-1 text-sm text-brand-700">
                     ✅ Ya hemos recibido la autorización firmada. Gracias.
                 </p>
                 <form v-else @submit.prevent="submitUpload" class="mt-2 space-y-2">
@@ -92,7 +92,7 @@ function formatDate(iso) {
                     <p v-if="uploadForm.errors.file" class="text-xs text-red-600">{{ uploadForm.errors.file }}</p>
                     <button
                         type="submit"
-                        class="w-full rounded-md border border-emerald-600 px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-50 disabled:opacity-50"
+                        class="w-full rounded-md border border-brand-600 px-4 py-2 text-sm font-semibold text-brand-700 hover:bg-brand-50 disabled:opacity-50"
                         :disabled="uploadForm.processing || !uploadForm.file"
                     >
                         Subir autorización (PDF o foto)

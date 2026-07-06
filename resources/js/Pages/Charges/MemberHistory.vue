@@ -34,7 +34,7 @@ const columns = [
                 <BadgeEstado :label="row.status_label" :color="row.status_color" />
             </template>
             <template #actions="{ row }">
-                <Link :href="route('charges.show', row.charge_id)" class="text-emerald-700 hover:underline">Ver cobro</Link>
+                <Link :href="route('charges.show', row.charge_id)" class="text-brand-700 hover:underline">Ver cobro</Link>
             </template>
         </DataTable>
     </AppLayout>

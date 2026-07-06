@@ -20,8 +20,8 @@ watch(
 
 const styles = {
     success: 'bg-emerald-600',
-    error: 'bg-red-600',
-    info: 'bg-slate-700',
+    error: 'bg-brand-600',
+    info: 'bg-ink-700',
 }
 </script>
 

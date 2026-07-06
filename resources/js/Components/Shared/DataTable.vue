@@ -92,7 +92,7 @@ function toggleSort(col) {
                     v-model="query"
                     type="search"
                     :placeholder="placeholder"
-                    class="w-full rounded-md border-slate-300 pl-9 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
+                    class="w-full rounded-lg border-ink-300 pl-9 text-sm shadow-sm focus:border-brand-500 focus:ring-brand-500"
                 />
                 <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">⌕</span>
             </div>

@@ -27,7 +27,7 @@ function exportCsv() {
         <PageHeader title="Informe económico" subtitle="Ingresos y gastos por categoría y periodo (memoria económica).">
             <template #actions>
                 <button
-                    class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                    class="rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
                     @click="exportCsv"
                 >
                     Exportar CSV
@@ -52,7 +52,7 @@ function exportCsv() {
         <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div class="rounded-lg border border-slate-200 bg-white p-4">
                 <p class="text-xs text-slate-500">Ingresos</p>
-                <p class="text-2xl font-bold text-emerald-700">{{ Number(report.total_income).toFixed(2) }} €</p>
+                <p class="text-2xl font-bold text-brand-700">{{ Number(report.total_income).toFixed(2) }} €</p>
             </div>
             <div class="rounded-lg border border-slate-200 bg-white p-4">
                 <p class="text-xs text-slate-500">Gastos</p>
@@ -60,7 +60,7 @@ function exportCsv() {
             </div>
             <div class="rounded-lg border border-slate-200 bg-white p-4">
                 <p class="text-xs text-slate-500">Balance</p>
-                <p class="text-2xl font-bold" :class="report.balance >= 0 ? 'text-emerald-700' : 'text-red-600'">
+                <p class="text-2xl font-bold" :class="report.balance >= 0 ? 'text-brand-700' : 'text-red-600'">
                     {{ Number(report.balance).toFixed(2) }} €
                 </p>
             </div>

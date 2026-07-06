@@ -74,7 +74,7 @@ function toggleBranch(value) {
                     type="button"
                     class="rounded-full border px-3 py-1 text-sm"
                     :class="form.branches.includes(b.value)
-                        ? 'border-emerald-600 bg-emerald-600 text-white'
+                        ? 'border-brand-600 bg-brand-600 text-white'
                         : 'border-slate-300 text-slate-600 hover:bg-slate-50'"
                     @click="toggleBranch(b.value)"
                 >

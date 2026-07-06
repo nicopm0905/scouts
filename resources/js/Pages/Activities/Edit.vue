@@ -83,7 +83,7 @@ function submit() {
                     :key="a.id"
                     class="flex items-center justify-between"
                 >
-                    <a :href="a.web_view_link" target="_blank" class="text-emerald-700 hover:underline">{{ a.id }}</a>
+                    <a :href="a.web_view_link" target="_blank" class="text-brand-700 hover:underline">{{ a.id }}</a>
                     <button type="button" class="text-xs text-red-600 hover:underline" @click="removeAttachment(a.id)">Quitar</button>
                 </li>
             </ul>
@@ -97,7 +97,7 @@ function submit() {
         <div>
             <div class="mb-2 flex items-center justify-between">
                 <label class="block text-sm font-medium text-slate-700">Materiales</label>
-                <button type="button" class="text-xs font-medium text-emerald-700 hover:underline" @click="addMaterial">
+                <button type="button" class="text-xs font-medium text-brand-700 hover:underline" @click="addMaterial">
                     + Añadir material
                 </button>
             </div>
@@ -113,7 +113,7 @@ function submit() {
         </div>
 
         <div class="flex justify-end gap-2 pt-2">
-            <button type="submit" class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700" :disabled="form.processing">
+            <button type="submit" class="rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700" :disabled="form.processing">
                 Guardar cambios
             </button>
         </div>

@@ -124,16 +124,16 @@ function formatDate(iso) {
                 <Link
                     v-if="can('events.manage')"
                     :href="route('events.create')"
-                    class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                    class="rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
                 >
                     + Nuevo evento
                 </Link>
             </template>
         </PageHeader>
 
-        <div v-if="showIcal" class="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 p-4">
-            <p class="text-sm font-medium text-emerald-900">Suscripción al calendario</p>
-            <p class="mt-1 text-xs text-emerald-800">
+        <div v-if="showIcal" class="mb-6 rounded-lg border border-brand-200 bg-brand-50 p-4">
+            <p class="text-sm font-medium text-brand-900">Suscripción al calendario</p>
+            <p class="mt-1 text-xs text-brand-800">
                 Añade este enlace a Google Calendar (Otros calendarios → Desde URL) para ver los eventos
                 automáticamente, en modo solo lectura.
             </p>
@@ -155,7 +155,7 @@ function formatDate(iso) {
                 <button
                     type="button"
                     class="rounded-md px-3 py-1.5 text-sm font-medium"
-                    :class="view === 'list' ? 'bg-emerald-600 text-white' : 'bg-white text-slate-600 border border-slate-300'"
+                    :class="view === 'list' ? 'bg-brand-600 text-white' : 'bg-white text-slate-600 border border-slate-300'"
                     @click="view = 'list'"
                 >
                     Lista
@@ -163,14 +163,14 @@ function formatDate(iso) {
                 <button
                     type="button"
                     class="rounded-md px-3 py-1.5 text-sm font-medium"
-                    :class="view === 'month' ? 'bg-emerald-600 text-white' : 'bg-white text-slate-600 border border-slate-300'"
+                    :class="view === 'month' ? 'bg-brand-600 text-white' : 'bg-white text-slate-600 border border-slate-300'"
                     @click="view = 'month'"
                 >
                     Mes
                 </button>
             </div>
 
-            <select v-model="branch" @change="applyBranch" class="rounded-md border-slate-300 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
+            <select v-model="branch" @change="applyBranch" class="rounded-md border-slate-300 text-sm shadow-sm focus:border-brand-500 focus:ring-brand-500">
                 <option value="">Todas las ramas</option>
                 <option v-for="b in branchOptions" :key="b.value" :value="b.value">{{ b.label }}</option>
             </select>
@@ -182,7 +182,7 @@ function formatDate(iso) {
                 v-for="e in events"
                 :key="e.id"
                 :href="route('events.show', e.id)"
-                class="flex flex-col gap-1 rounded-lg border border-slate-200 bg-white p-4 hover:border-emerald-300 sm:flex-row sm:items-center sm:justify-between"
+                class="flex flex-col gap-1 rounded-lg border border-slate-200 bg-white p-4 hover:border-brand-300 sm:flex-row sm:items-center sm:justify-between"
             >
                 <div>
                     <div class="flex items-center gap-2">

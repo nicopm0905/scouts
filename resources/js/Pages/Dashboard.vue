@@ -1,5 +1,5 @@
 <script setup>
-import { Head, Link } from '@inertiajs/vue3'
+import { Head } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import PageHeader from '@/Components/Shared/PageHeader.vue'
 import BadgeEstado from '@/Components/Shared/BadgeEstado.vue'
@@ -14,18 +14,12 @@ const props = defineProps({
 
 const { user } = useAuth()
 
-// Tarjetas del semáforo documental. color: verde si 0, ámbar/rojo si hay pendientes.
 function card(label, value, hint, dangerColor = 'red') {
-    return {
-        label,
-        value,
-        hint,
-        color: value > 0 ? dangerColor : 'green',
-    }
+    return { label, value, hint, color: value > 0 ? dangerColor : 'green' }
 }
 
 const semaphoreCards = [
-    card('Cuotas/cobros pendientes', props.semaphore.pending_charges ?? 0, 'Miembros con pagos sin cerrar', 'yellow'),
+    card('Cuotas pendientes', props.semaphore.pending_charges ?? 0, 'Miembros con pagos sin cerrar', 'amber'),
     card(
         'Autorizaciones que faltan',
         props.semaphore.missing_authorizations ?? 0,
@@ -34,6 +28,12 @@ const semaphoreCards = [
     card('Certificados por caducar', props.semaphore.expiring_certificates ?? 0, 'Delitos sexuales (≤30 días)'),
     card('Documentos por caducar', props.semaphore.expiring_documents ?? 0, 'Seguros, censo… (≤30 días)'),
 ]
+
+const styles = {
+    green: { ring: 'border-emerald-200', dot: 'bg-emerald-500', icon: '✓', chip: 'text-emerald-600' },
+    amber: { ring: 'border-amber-200', dot: 'bg-amber-500', icon: '!', chip: 'text-amber-600' },
+    red: { ring: 'border-brand-200', dot: 'bg-brand-500', icon: '!', chip: 'text-brand-600' },
+}
 </script>
 
 <template>
@@ -46,51 +46,43 @@ const semaphoreCards = [
         />
 
         <!-- Semáforo documental -->
-        <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            <div
-                v-for="c in semaphoreCards"
-                :key="c.label"
-                class="rounded-lg border bg-white p-4 shadow-sm"
-                :class="c.color === 'green' ? 'border-emerald-200' : c.color === 'yellow' ? 'border-amber-300' : 'border-red-300'"
-            >
-                <div class="flex items-center justify-between">
-                    <span class="text-sm font-medium text-slate-600">{{ c.label }}</span>
-                    <span
-                        class="text-2xl"
-                        :class="c.color === 'green' ? 'text-emerald-500' : c.color === 'yellow' ? 'text-amber-500' : 'text-red-500'"
-                    >
-                        {{ c.color === 'green' ? '✅' : c.color === 'yellow' ? '⚠️' : '❗' }}
+        <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <div v-for="c in semaphoreCards" :key="c.label" class="card p-4" :class="styles[c.color].ring">
+                <div class="flex items-start justify-between">
+                    <span class="text-sm font-medium text-ink-500">{{ c.label }}</span>
+                    <span class="flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold text-white" :class="styles[c.color].dot">
+                        {{ styles[c.color].icon }}
                     </span>
                 </div>
-                <p class="mt-2 text-3xl font-bold text-slate-800">{{ c.value }}</p>
-                <p class="mt-1 text-xs text-slate-400">{{ c.hint }}</p>
+                <p class="mt-3 text-3xl font-bold text-ink-900">{{ c.value }}</p>
+                <p class="mt-1 text-xs text-ink-400">{{ c.hint }}</p>
             </div>
         </div>
 
         <div class="mt-6 grid gap-6 lg:grid-cols-2">
             <!-- Próximos eventos -->
-            <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-                <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Próximos eventos</h2>
-                <ul v-if="upcomingEvents.length" class="divide-y divide-slate-100">
-                    <li v-for="e in upcomingEvents" :key="e.id" class="flex items-center justify-between py-2">
+            <section class="card-pad">
+                <h2 class="section-title mb-3">Próximos eventos</h2>
+                <ul v-if="upcomingEvents.length" class="divide-y divide-ink-100">
+                    <li v-for="e in upcomingEvents" :key="e.id" class="flex items-center justify-between py-2.5">
                         <div>
-                            <p class="text-sm font-medium text-slate-700">{{ e.title }}</p>
-                            <p class="text-xs text-slate-400">{{ e.type }} · {{ e.location || 'Sin lugar' }}</p>
+                            <p class="text-sm font-medium text-ink-800">{{ e.title }}</p>
+                            <p class="text-xs text-ink-400">{{ e.type }} · {{ e.location || 'Sin lugar' }}</p>
                         </div>
-                        <span class="text-xs text-slate-500">{{ e.start_at }}</span>
+                        <span class="whitespace-nowrap text-xs font-medium text-ink-500">{{ e.start_at }}</span>
                     </li>
                 </ul>
-                <p v-else class="text-sm text-slate-400">No hay eventos próximos.</p>
+                <p v-else class="py-6 text-center text-sm text-ink-400">No hay eventos próximos.</p>
             </section>
 
             <!-- Últimos cobros -->
-            <section v-if="recentCharges.length" class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-                <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Últimos cobros</h2>
-                <ul class="divide-y divide-slate-100">
-                    <li v-for="c in recentCharges" :key="c.id" class="flex items-center justify-between py-2">
+            <section v-if="recentCharges.length" class="card-pad">
+                <h2 class="section-title mb-3">Últimos cobros</h2>
+                <ul class="divide-y divide-ink-100">
+                    <li v-for="c in recentCharges" :key="c.id" class="flex items-center justify-between py-2.5">
                         <div>
-                            <p class="text-sm font-medium text-slate-700">{{ c.member }}</p>
-                            <p class="text-xs text-slate-400">{{ c.charge }} · {{ c.amount }} €</p>
+                            <p class="text-sm font-medium text-ink-800">{{ c.member }}</p>
+                            <p class="text-xs text-ink-400">{{ c.charge }} · {{ c.amount }} €</p>
                         </div>
                         <BadgeEstado :label="c.status" :color="c.status_color" />
                     </li>
@@ -98,20 +90,20 @@ const semaphoreCards = [
             </section>
 
             <!-- Alertas de inventario -->
-            <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-                <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Inventario</h2>
-                <div class="flex gap-6">
+            <section class="card-pad">
+                <h2 class="section-title mb-3">Inventario</h2>
+                <div class="flex gap-8">
                     <div>
-                        <p class="text-2xl font-bold" :class="(inventoryAlerts.review_due ?? 0) > 0 ? 'text-amber-600' : 'text-slate-700'">
+                        <p class="text-3xl font-bold" :class="(inventoryAlerts.review_due ?? 0) > 0 ? 'text-amber-600' : 'text-ink-800'">
                             {{ inventoryAlerts.review_due ?? 0 }}
                         </p>
-                        <p class="text-xs text-slate-400">Ítems por revisar</p>
+                        <p class="mt-1 text-xs text-ink-400">Ítems por revisar</p>
                     </div>
                     <div>
-                        <p class="text-2xl font-bold" :class="(inventoryAlerts.overdue_checkouts ?? 0) > 0 ? 'text-red-600' : 'text-slate-700'">
+                        <p class="text-3xl font-bold" :class="(inventoryAlerts.overdue_checkouts ?? 0) > 0 ? 'text-brand-600' : 'text-ink-800'">
                             {{ inventoryAlerts.overdue_checkouts ?? 0 }}
                         </p>
-                        <p class="text-xs text-slate-400">Préstamos sin devolver</p>
+                        <p class="mt-1 text-xs text-ink-400">Préstamos sin devolver</p>
                     </div>
                 </div>
             </section>

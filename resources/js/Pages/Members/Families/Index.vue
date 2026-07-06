@@ -27,7 +27,7 @@ const columns = [
                 <Link
                     v-if="canManage"
                     :href="route('families.create')"
-                    class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                    class="rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
                 >
                     + Nueva familia
                 </Link>
@@ -36,7 +36,7 @@ const columns = [
 
         <DataTable :columns="columns" :rows="families" persist-key="families" placeholder="Buscar familia…">
             <template #cell-name="{ row }">
-                <Link :href="route('families.edit', row.id)" class="font-medium text-emerald-700 hover:underline">
+                <Link :href="route('families.edit', row.id)" class="font-medium text-brand-700 hover:underline">
                     {{ row.name }}
                 </Link>
             </template>

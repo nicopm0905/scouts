@@ -81,7 +81,7 @@ function destroyEntry(entry) {
                 <button
                     v-if="can('history.manage')"
                     type="button"
-                    class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                    class="rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
                     @click="openCreate"
                 >
                     Nueva entrada
@@ -103,7 +103,7 @@ function destroyEntry(entry) {
                 />
                 <div class="flex-1">
                     <div class="flex items-center gap-2">
-                        <span class="text-sm font-bold text-emerald-700">{{ entry.year }}</span>
+                        <span class="text-sm font-bold text-brand-700">{{ entry.year }}</span>
                         <span class="font-semibold text-slate-800">{{ entry.title }}</span>
                         <span v-if="!entry.published" class="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-500">
                             Borrador
@@ -112,7 +112,7 @@ function destroyEntry(entry) {
                     <p v-if="entry.body" class="mt-1 text-sm text-slate-500">{{ entry.body }}</p>
                 </div>
                 <div v-if="can('history.manage')" class="flex items-center gap-3">
-                    <button type="button" class="text-xs font-medium text-emerald-700 hover:underline" @click="openEdit(entry)">
+                    <button type="button" class="text-xs font-medium text-brand-700 hover:underline" @click="openEdit(entry)">
                         Editar
                     </button>
                     <ConfirmButton
@@ -150,7 +150,7 @@ function destroyEntry(entry) {
                 </button>
                 <button
                     type="button"
-                    class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                    class="rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
                     :disabled="form.processing"
                     @click="submit"
                 >

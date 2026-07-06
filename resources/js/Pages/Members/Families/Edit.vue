@@ -56,7 +56,7 @@ function destroy() {
                 <FormField v-model="form.notes" type="textarea" label="Notas" :error="form.errors.notes" />
                 <button
                     type="submit"
-                    class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+                    class="rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
                     :disabled="form.processing"
                 >
                     Guardar cambios
@@ -67,7 +67,7 @@ function destroy() {
                 <h2 class="mb-4 text-lg font-semibold text-slate-800">Miembros vinculados</h2>
                 <ul v-if="family.members.length" class="space-y-2 text-sm">
                     <li v-for="m in family.members" :key="m.id" class="flex items-center justify-between">
-                        <Link :href="route('members.show', m.id)" class="text-emerald-700 hover:underline">{{ m.full_name }}</Link>
+                        <Link :href="route('members.show', m.id)" class="text-brand-700 hover:underline">{{ m.full_name }}</Link>
                         <span class="text-slate-400">{{ m.relationship }}</span>
                     </li>
                 </ul>

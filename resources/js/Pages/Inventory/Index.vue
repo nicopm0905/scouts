@@ -112,7 +112,7 @@ const hasAlerts = computed(() => props.needingReview.length > 0 || props.overdue
                 <Link
                     v-if="can.manage"
                     :href="route('inventory.create')"
-                    class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700"
+                    class="rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-700"
                 >
                     + Nuevo ítem
                 </Link>
@@ -279,7 +279,7 @@ const hasAlerts = computed(() => props.needingReview.length > 0 || props.overdue
                 </button>
                 <button
                     type="button"
-                    class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                    class="rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
                     :disabled="reserveForm.processing"
                     @click="submitReserve"
                 >

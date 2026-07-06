@@ -72,7 +72,7 @@ function unlinkObjective(objectiveId) {
             <button v-if="canManage" class="rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200" @click="duplicate">
                 Duplicar
             </button>
-            <Link v-if="canManage" :href="route('activities.edit', activity.id)" class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">
+            <Link v-if="canManage" :href="route('activities.edit', activity.id)" class="rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700">
                 Editar
             </Link>
             <ConfirmButton v-if="canManage" message="¿Eliminar esta actividad?" confirm-label="Eliminar" @confirm="destroyActivity">
@@ -97,7 +97,7 @@ function unlinkObjective(objectiveId) {
                 <h3 class="mb-2 font-semibold text-slate-700">Adjuntos</h3>
                 <ul class="space-y-1 text-sm">
                     <li v-for="a in activity.attachments" :key="a.id">
-                        <a :href="a.web_view_link" target="_blank" class="text-emerald-700 hover:underline">{{ a.id }}</a>
+                        <a :href="a.web_view_link" target="_blank" class="text-brand-700 hover:underline">{{ a.id }}</a>
                     </li>
                 </ul>
             </div>
@@ -129,7 +129,7 @@ function unlinkObjective(objectiveId) {
                         <option value="">Elegir evento…</option>
                         <option v-for="e in availableEvents" :key="e.id" :value="e.id">{{ e.title }}</option>
                     </select>
-                    <button class="rounded-md bg-emerald-600 px-3 py-1 text-sm text-white hover:bg-emerald-700" @click="linkEvent">
+                    <button class="rounded-md bg-brand-600 px-3 py-1 text-sm text-white hover:bg-brand-700" @click="linkEvent">
                         Programar
                     </button>
                 </div>
@@ -149,7 +149,7 @@ function unlinkObjective(objectiveId) {
                         <option value="">Elegir objetivo…</option>
                         <option v-for="o in availableObjectives" :key="o.id" :value="o.id">{{ o.label }}</option>
                     </select>
-                    <button class="rounded-md bg-emerald-600 px-3 py-1 text-sm text-white hover:bg-emerald-700" @click="linkObjective">
+                    <button class="rounded-md bg-brand-600 px-3 py-1 text-sm text-white hover:bg-brand-700" @click="linkObjective">
                         Vincular
                     </button>
                 </div>

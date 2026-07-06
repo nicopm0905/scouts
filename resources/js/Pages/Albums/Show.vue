@@ -71,12 +71,12 @@ function destroyPhoto(photo) {
                 <input
                     v-model="uploadForm.caption"
                     type="text"
-                    class="mt-1 block w-full rounded-md border-slate-300 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
+                    class="mt-1 block w-full rounded-md border-slate-300 text-sm shadow-sm focus:border-brand-500 focus:ring-brand-500"
                 />
             </div>
             <button
                 type="submit"
-                class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                class="rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
                 :disabled="uploadForm.processing || !uploadForm.file"
             >
                 Subir foto

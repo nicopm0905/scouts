@@ -50,7 +50,7 @@ function duplicate(activity) {
             <Link
                 v-if="canManage"
                 :href="route('activities.create')"
-                class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                class="rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
             >
                 + Nueva actividad
             </Link>
@@ -90,7 +90,7 @@ function duplicate(activity) {
         </template>
         <template #actions="{ row }">
             <div class="flex justify-end gap-3">
-                <Link :href="route('activities.show', row.id)" class="text-emerald-700 hover:underline">Ver</Link>
+                <Link :href="route('activities.show', row.id)" class="text-brand-700 hover:underline">Ver</Link>
                 <button v-if="canManage" class="text-slate-500 hover:underline" @click="duplicate(row)">Duplicar</button>
             </div>
         </template>

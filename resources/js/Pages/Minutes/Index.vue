@@ -111,7 +111,7 @@ function remove(minute) {
                 <button
                     v-if="can.manage"
                     type="button"
-                    class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700"
+                    class="rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-700"
                     @click="openCreate"
                 >
                     + Nueva acta
@@ -169,7 +169,7 @@ function remove(minute) {
                             v-for="opt in attendeeOptions"
                             :key="opt.value"
                             class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs"
-                            :class="form.attendee_ids.includes(opt.value) ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-slate-300 text-slate-600'"
+                            :class="form.attendee_ids.includes(opt.value) ? 'border-brand-500 bg-brand-50 text-brand-700' : 'border-slate-300 text-slate-600'"
                         >
                             <input type="checkbox" class="sr-only" :checked="form.attendee_ids.includes(opt.value)" @change="toggleAttendee(opt.value)" />
                             {{ opt.label }}
@@ -182,7 +182,7 @@ function remove(minute) {
                 <div>
                     <div class="flex items-center justify-between">
                         <label class="block text-sm font-medium text-slate-700">Orden del día</label>
-                        <button type="button" class="text-xs font-semibold text-emerald-700 hover:underline" @click="addItem">
+                        <button type="button" class="text-xs font-semibold text-brand-700 hover:underline" @click="addItem">
                             + Añadir punto
                         </button>
                     </div>
@@ -211,7 +211,7 @@ function remove(minute) {
                 </button>
                 <button
                     type="button"
-                    class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+                    class="rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
                     :disabled="form.processing"
                     @click="submit"
                 >

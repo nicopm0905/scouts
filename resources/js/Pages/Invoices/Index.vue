@@ -90,7 +90,7 @@ function generatePdf(row) {
                         v-for="opt in [{ value: null, label: 'Todas' }, ...directions]"
                         :key="opt.value ?? 'all'"
                         class="rounded-full border px-3 py-1 text-sm"
-                        :class="direction === opt.value ? 'border-emerald-600 bg-emerald-50 text-emerald-700' : 'border-slate-300 text-slate-600'"
+                        :class="direction === opt.value ? 'border-brand-600 bg-brand-50 text-brand-700' : 'border-slate-300 text-slate-600'"
                         @click="filterDirection(opt.value)"
                     >
                         {{ opt.label }}
@@ -108,13 +108,13 @@ function generatePdf(row) {
             </div>
             <div
                 class="flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 text-center text-sm transition"
-                :class="dragging ? 'border-emerald-500 bg-emerald-50' : 'border-slate-300 bg-white'"
+                :class="dragging ? 'border-brand-500 bg-brand-50' : 'border-slate-300 bg-white'"
                 @dragover.prevent="dragging = true"
                 @dragleave.prevent="dragging = false"
                 @drop.prevent="onDrop"
             >
                 <p class="text-slate-500">Arrastra aquí tus facturas (PDF/imagen) o</p>
-                <label class="mt-2 cursor-pointer rounded-md bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-700">
+                <label class="mt-2 cursor-pointer rounded-md bg-brand-600 px-4 py-2 text-xs font-semibold text-white hover:bg-brand-700">
                     Seleccionar ficheros
                     <input type="file" multiple class="hidden" accept=".pdf,.jpg,.jpeg,.png" @change="onPick" />
                 </label>
@@ -184,7 +184,7 @@ function generatePdf(row) {
             </template>
             <template #actions="{ row }">
                 <div class="flex items-center justify-end gap-2">
-                    <a v-if="row.view_url" :href="row.view_url" target="_blank" class="text-xs text-emerald-700 hover:underline">Ver fichero</a>
+                    <a v-if="row.view_url" :href="row.view_url" target="_blank" class="text-xs text-brand-700 hover:underline">Ver fichero</a>
                     <button
                         v-if="can('invoices.manage') && row.direction === 'issued'"
                         class="rounded-md bg-slate-700 px-2 py-1 text-xs font-semibold text-white hover:bg-slate-800"

@@ -80,7 +80,7 @@ function submit() {
             <template #actions>
                 <button
                     v-if="can('charges.manage')"
-                    class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                    class="rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
                     @click="showCreate = true"
                 >
                     + Nuevo cobro
@@ -92,7 +92,7 @@ function submit() {
             <template #cell-amount="{ value }">{{ Number(value).toFixed(2) }} €</template>
             <template #cell-due_date="{ value }">{{ value ?? 'Sin fecha' }}</template>
             <template #actions="{ row }">
-                <Link :href="route('charges.show', row.id)" class="text-emerald-700 hover:underline">Ver control</Link>
+                <Link :href="route('charges.show', row.id)" class="text-brand-700 hover:underline">Ver control</Link>
             </template>
         </DataTable>
 
@@ -129,7 +129,7 @@ function submit() {
                             type="button"
                             class="rounded-full border px-3 py-1 text-sm"
                             :class="form.target_branches.includes(b.value)
-                                ? 'border-emerald-600 bg-emerald-50 text-emerald-700'
+                                ? 'border-brand-600 bg-brand-50 text-brand-700'
                                 : 'border-slate-300 text-slate-600'"
                             @click="toggleBranch(b.value)"
                         >
@@ -166,7 +166,7 @@ function submit() {
                     Cancelar
                 </button>
                 <button
-                    class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+                    class="rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
                     :disabled="form.processing"
                     @click="submit"
                 >

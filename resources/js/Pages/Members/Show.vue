@@ -150,7 +150,7 @@ const certificateBadge = computed(() => {
                     <h2 class="text-lg font-semibold text-slate-800">Familiares</h2>
                     <button
                         v-if="canManage"
-                        class="text-sm font-semibold text-emerald-700 hover:underline"
+                        class="text-sm font-semibold text-brand-700 hover:underline"
                         @click="showFamilyLink = !showFamilyLink"
                     >
                         + Vincular familiar
@@ -173,7 +173,7 @@ const certificateBadge = computed(() => {
                         :error="familyForm.errors.relationship"
                     />
                     <button
-                        class="rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-emerald-700"
+                        class="rounded-md bg-brand-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-brand-700"
                         @click="linkFamily"
                     >
                         Vincular
@@ -182,7 +182,7 @@ const certificateBadge = computed(() => {
 
                 <ul v-if="families.length" class="space-y-2 text-sm">
                     <li v-for="f in families" :key="f.id" class="flex items-center justify-between">
-                        <Link :href="route('families.edit', f.id)" class="text-emerald-700 hover:underline">
+                        <Link :href="route('families.edit', f.id)" class="text-brand-700 hover:underline">
                             {{ f.name }} <span class="text-slate-400">({{ f.relationship_label }})</span>
                         </Link>
                         <button v-if="canManage" class="text-xs text-red-600 hover:underline" @click="unlinkFamily(f)">
@@ -209,12 +209,12 @@ const certificateBadge = computed(() => {
                             class="mt-1 block w-full text-sm"
                             @change="healthForm.attachment = $event.target.files[0]"
                         />
-                        <p v-if="healthRecord?.drive_file_id" class="mt-1 text-xs text-emerald-700">Hay un documento adjunto.</p>
+                        <p v-if="healthRecord?.drive_file_id" class="mt-1 text-xs text-brand-700">Hay un documento adjunto.</p>
                     </div>
                     <div class="sm:col-span-2">
                         <button
                             type="submit"
-                            class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+                            class="rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
                             :disabled="healthForm.processing"
                         >
                             Guardar ficha sanitaria
@@ -237,7 +237,7 @@ const certificateBadge = computed(() => {
                         </span>
                         <div class="flex items-center gap-3">
                             <label class="flex items-center gap-1 text-sm text-slate-600">
-                                <input v-model="consent.granted" type="checkbox" class="rounded border-slate-300 text-emerald-600" />
+                                <input v-model="consent.granted" type="checkbox" class="rounded border-slate-300 text-brand-600" />
                                 Concedido
                             </label>
                             <input v-model="consent.signed_at" type="date" class="rounded-md border-slate-300 text-sm shadow-sm" />
@@ -245,7 +245,7 @@ const certificateBadge = computed(() => {
                     </div>
                     <button
                         type="submit"
-                        class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+                        class="rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
                         :disabled="consentForm.processing"
                     >
                         Guardar consentimientos
@@ -283,7 +283,7 @@ const certificateBadge = computed(() => {
                     <div class="sm:col-span-3">
                         <button
                             type="submit"
-                            class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+                            class="rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
                             :disabled="leaderForm.processing"
                         >
                             Guardar perfil
@@ -332,7 +332,7 @@ const certificateBadge = computed(() => {
                     <div class="flex items-end">
                         <button
                             type="submit"
-                            class="rounded-md border border-emerald-600 px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-50"
+                            class="rounded-md border border-brand-600 px-4 py-2 text-sm font-semibold text-brand-700 hover:bg-brand-50"
                         >
                             Añadir formación
                         </button>
