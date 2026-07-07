@@ -39,26 +39,26 @@ function formatDate(iso) {
 <template>
     <Head title="Confirmación de inscripción" />
 
-    <div class="flex min-h-screen items-center justify-center bg-slate-100 px-4 py-10">
+    <div class="flex min-h-screen items-center justify-center bg-ink-100 px-4 py-10">
         <div class="w-full max-w-lg rounded-lg bg-white p-6 shadow-md sm:p-8">
             <div class="mb-4 text-center">
                 <span class="text-3xl">⚜️</span>
-                <h1 class="mt-2 text-lg font-bold text-slate-800">MSC Andalucía</h1>
-                <p class="text-sm text-slate-500">Confirmación de inscripción</p>
+                <h1 class="mt-2 text-lg font-bold text-ink-800">MSC Andalucía</h1>
+                <p class="text-sm text-ink-500">Confirmación de inscripción</p>
             </div>
 
-            <div class="rounded-md border border-slate-200 bg-slate-50 p-4">
-                <h2 class="font-semibold text-slate-800">{{ event.title }}</h2>
-                <p class="text-sm text-slate-500">{{ event.type_label }}</p>
-                <p class="mt-2 text-sm text-slate-600">
+            <div class="rounded-md border border-ink-200 bg-ink-50 p-4">
+                <h2 class="font-semibold text-ink-800">{{ event.title }}</h2>
+                <p class="text-sm text-ink-500">{{ event.type_label }}</p>
+                <p class="mt-2 text-sm text-ink-600">
                     <strong>Fechas:</strong> {{ formatDate(event.start_at) }}
                     <span v-if="event.end_at"> — {{ formatDate(event.end_at) }}</span>
                 </p>
-                <p v-if="event.location" class="text-sm text-slate-600"><strong>Lugar:</strong> {{ event.location }}</p>
-                <p v-if="event.description" class="mt-2 whitespace-pre-line text-sm text-slate-600">{{ event.description }}</p>
+                <p v-if="event.location" class="text-sm text-ink-600"><strong>Lugar:</strong> {{ event.location }}</p>
+                <p v-if="event.description" class="mt-2 whitespace-pre-line text-sm text-ink-600">{{ event.description }}</p>
             </div>
 
-            <p class="mt-4 text-sm text-slate-700">
+            <p class="mt-4 text-sm text-ink-700">
                 Participante: <strong>{{ member_name }}</strong>
             </p>
 
@@ -77,8 +77,8 @@ function formatDate(iso) {
                 </button>
             </div>
 
-            <div class="mt-6 border-t border-slate-100 pt-4">
-                <h3 class="text-sm font-semibold text-slate-700">Autorización firmada</h3>
+            <div class="mt-6 border-t border-ink-100 pt-4">
+                <h3 class="text-sm font-semibold text-ink-700">Autorización firmada</h3>
                 <p v-if="has_authorization" class="mt-1 text-sm text-brand-700">
                     ✅ Ya hemos recibido la autorización firmada. Gracias.
                 </p>
@@ -86,7 +86,7 @@ function formatDate(iso) {
                     <input
                         type="file"
                         accept=".pdf,.jpg,.jpeg,.png"
-                        class="block w-full text-sm text-slate-600"
+                        class="block w-full text-sm text-ink-600"
                         @change="uploadForm.file = $event.target.files[0]"
                     />
                     <p v-if="uploadForm.errors.file" class="text-xs text-red-600">{{ uploadForm.errors.file }}</p>

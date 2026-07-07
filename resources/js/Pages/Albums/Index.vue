@@ -60,58 +60,36 @@ function destroyAlbum(album) {
     <AppLayout>
         <PageHeader title="Álbumes de fotos" subtitle="Fotos de eventos y salidas alojadas en Google Drive.">
             <template #actions>
-                <button
-                    v-if="can('photos.manage')"
-                    type="button"
-                    class="rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
-                    @click="showCreate = true"
-                >
-                    Nuevo álbum
-                </button>
-                <Link
-                    :href="route('albums.public')"
-                    class="rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100"
-                >
-                    Ver galería pública
-                </Link>
+                <Link :href="route('albums.public')" class="btn-secondary btn-sm">Galería pública</Link>
+                <button v-if="can('photos.manage')" type="button" class="btn-primary btn-sm" @click="showCreate = true">+ Nuevo álbum</button>
             </template>
         </PageHeader>
 
-        <div v-if="albums.length" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <div
-                v-for="album in albums"
-                :key="album.id"
-                class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm"
-            >
-                <div class="flex items-start justify-between gap-2">
-                    <div>
-                        <Link :href="route('albums.show', album.id)" class="font-semibold text-slate-800 hover:underline">
-                            {{ album.title }}
-                        </Link>
-                        <p v-if="album.event" class="text-xs text-slate-500">{{ album.event.title }}</p>
-                    </div>
-                    <span
-                        class="rounded-full px-2 py-0.5 text-xs font-medium"
-                        :class="album.visibility === 'publishable' ? 'bg-brand-100 text-brand-700' : 'bg-slate-100 text-slate-600'"
-                    >
+        <div v-if="albums.length" class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <div v-for="album in albums" :key="album.id" class="card overflow-hidden transition hover:shadow-card-hover">
+                <!-- Portada -->
+                <Link :href="route('albums.show', album.id)" class="relative flex h-32 items-center justify-center overflow-hidden bg-gradient-to-br from-ink-700 to-ink-900">
+                    <img v-if="album.cover_url" :src="album.cover_url" class="h-full w-full object-cover" alt="" />
+                    <span v-else class="text-4xl opacity-80">📷</span>
+                    <span class="absolute right-2 top-2 rounded-full px-2 py-0.5 text-[11px] font-medium"
+                        :class="album.visibility === 'publishable' ? 'bg-brand-600 text-white' : 'bg-white/90 text-ink-700'">
                         {{ album.visibility === 'publishable' ? 'Publicable' : 'Interno' }}
                     </span>
-                </div>
-                <p v-if="album.description" class="mt-2 text-sm text-slate-500">{{ album.description }}</p>
-                <div class="mt-3 flex items-center justify-between text-sm text-slate-500">
-                    <span>{{ album.photos_count }} foto(s)</span>
-                    <ConfirmButton
-                        v-if="can('photos.manage')"
-                        message="¿Eliminar este álbum y todas sus fotos?"
-                        confirm-label="Eliminar"
-                        @confirm="destroyAlbum(album)"
-                    >
-                        <span class="text-xs font-medium text-red-600 hover:underline">Eliminar</span>
-                    </ConfirmButton>
+                </Link>
+                <div class="p-4">
+                    <Link :href="route('albums.show', album.id)" class="font-semibold text-ink-800 hover:text-brand-700">{{ album.title }}</Link>
+                    <p v-if="album.event" class="text-xs text-ink-500">{{ album.event.title }}</p>
+                    <p v-if="album.description" class="mt-1 line-clamp-2 text-sm text-ink-500">{{ album.description }}</p>
+                    <div class="mt-3 flex items-center justify-between text-sm text-ink-500">
+                        <span>{{ album.photos_count }} foto(s)</span>
+                        <ConfirmButton v-if="can('photos.manage')" message="¿Eliminar este álbum y todas sus fotos?" confirm-label="Eliminar" @confirm="destroyAlbum(album)">
+                            <span class="text-xs font-medium text-brand-600 hover:underline">Eliminar</span>
+                        </ConfirmButton>
+                    </div>
                 </div>
             </div>
         </div>
-        <p v-else class="rounded-lg border border-dashed border-slate-300 p-8 text-center text-slate-400">
+        <p v-else class="rounded-lg border border-dashed border-ink-300 p-8 text-center text-ink-400">
             Todavía no hay álbumes.
         </p>
 
@@ -135,21 +113,8 @@ function destroyAlbum(album) {
                 />
             </form>
             <template #footer>
-                <button
-                    type="button"
-                    class="rounded-md px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100"
-                    @click="showCreate = false"
-                >
-                    Cancelar
-                </button>
-                <button
-                    type="button"
-                    class="rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
-                    :disabled="form.processing"
-                    @click="submit"
-                >
-                    Crear álbum
-                </button>
+                <button type="button" class="btn-ghost" @click="showCreate = false">Cancelar</button>
+                <button type="button" class="btn-primary" :disabled="form.processing" @click="submit">Crear álbum</button>
             </template>
         </Modal>
     </AppLayout>

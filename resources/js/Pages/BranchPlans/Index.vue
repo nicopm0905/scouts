@@ -60,10 +60,10 @@ function submit() {
     <DataTable :columns="columns" :rows="plans" persist-key="branch-plans" placeholder="Buscar rama o curso…">
         <template #cell-completion_percentage="{ row }">
             <div class="flex items-center gap-2">
-                <div class="h-2 w-32 overflow-hidden rounded-full bg-slate-200">
+                <div class="h-2 w-32 overflow-hidden rounded-full bg-ink-200">
                     <div class="h-full bg-brand-500" :style="{ width: row.completion_percentage + '%' }" />
                 </div>
-                <span class="text-xs text-slate-500">{{ row.completion_percentage }}%</span>
+                <span class="text-xs text-ink-500">{{ row.completion_percentage }}%</span>
             </div>
         </template>
         <template #actions="{ row }">
@@ -97,7 +97,7 @@ function submit() {
             />
         </form>
         <template #footer>
-            <button class="rounded-md px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100" @click="showCreate = false">
+            <button class="rounded-md px-4 py-2 text-sm font-medium text-ink-600 hover:bg-ink-100" @click="showCreate = false">
                 Cancelar
             </button>
             <button

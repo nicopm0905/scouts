@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import { useForm } from '@inertiajs/vue3'
+import { Head, useForm } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import PageHeader from '@/Components/Shared/PageHeader.vue'
 import Modal from '@/Components/Shared/Modal.vue'
@@ -105,17 +105,11 @@ function remove(minute) {
 </script>
 
 <template>
+    <Head title="Actas" />
     <AppLayout>
-        <PageHeader title="Actas" subtitle="Actas de consejo y asamblea, con generación automática de PDF">
+        <PageHeader title="Actas" subtitle="Actas de consejo y asamblea, con generación automática de PDF.">
             <template #actions>
-                <button
-                    v-if="can.manage"
-                    type="button"
-                    class="rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-700"
-                    @click="openCreate"
-                >
-                    + Nueva acta
-                </button>
+                <button v-if="can.manage" type="button" class="btn-primary btn-sm" @click="openCreate">+ Nueva acta</button>
             </template>
         </PageHeader>
 
@@ -127,12 +121,12 @@ function remove(minute) {
                         v-if="row.web_view_link"
                         :href="row.web_view_link"
                         target="_blank"
-                        class="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50"
+                        class="rounded-md border border-ink-300 px-3 py-1.5 text-xs font-medium text-ink-600 hover:bg-ink-50"
                     >Ver PDF</a>
                     <template v-if="can.manage">
                         <button
                             type="button"
-                            class="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50"
+                            class="rounded-md border border-ink-300 px-3 py-1.5 text-xs font-medium text-ink-600 hover:bg-ink-50"
                             @click="openEdit(row)"
                         >Editar</button>
                         <ConfirmButton message="¿Seguro que quieres eliminar esta acta?" confirm-label="Eliminar" @confirm="remove(row)">
@@ -163,34 +157,34 @@ function remove(minute) {
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-slate-700">Asistentes</label>
-                    <div class="mt-2 flex max-h-32 flex-wrap gap-2 overflow-y-auto rounded-md border border-slate-200 p-2">
+                    <label class="block text-sm font-medium text-ink-700">Asistentes</label>
+                    <div class="mt-2 flex max-h-32 flex-wrap gap-2 overflow-y-auto rounded-md border border-ink-200 p-2">
                         <label
                             v-for="opt in attendeeOptions"
                             :key="opt.value"
                             class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs"
-                            :class="form.attendee_ids.includes(opt.value) ? 'border-brand-500 bg-brand-50 text-brand-700' : 'border-slate-300 text-slate-600'"
+                            :class="form.attendee_ids.includes(opt.value) ? 'border-brand-500 bg-brand-50 text-brand-700' : 'border-ink-300 text-ink-600'"
                         >
                             <input type="checkbox" class="sr-only" :checked="form.attendee_ids.includes(opt.value)" @change="toggleAttendee(opt.value)" />
                             {{ opt.label }}
                         </label>
-                        <p v-if="attendeeOptions.length === 0" class="text-xs text-slate-400">No hay responsables registrados.</p>
+                        <p v-if="attendeeOptions.length === 0" class="text-xs text-ink-400">No hay responsables registrados.</p>
                     </div>
                     <p v-if="form.errors.attendee_ids" class="mt-1 text-xs text-red-600">{{ form.errors.attendee_ids }}</p>
                 </div>
 
                 <div>
                     <div class="flex items-center justify-between">
-                        <label class="block text-sm font-medium text-slate-700">Orden del día</label>
+                        <label class="block text-sm font-medium text-ink-700">Orden del día</label>
                         <button type="button" class="text-xs font-semibold text-brand-700 hover:underline" @click="addItem">
                             + Añadir punto
                         </button>
                     </div>
 
                     <div class="mt-2 space-y-3">
-                        <div v-for="(item, index) in form.items" :key="index" class="rounded-md border border-slate-200 p-3">
+                        <div v-for="(item, index) in form.items" :key="index" class="rounded-md border border-ink-200 p-3">
                             <div class="mb-2 flex items-center justify-between">
-                                <span class="text-xs font-semibold text-slate-500">Punto {{ index + 1 }}</span>
+                                <span class="text-xs font-semibold text-ink-500">Punto {{ index + 1 }}</span>
                                 <button type="button" class="text-xs text-red-600 hover:underline" @click="removeItem(index)">
                                     Quitar
                                 </button>
@@ -206,7 +200,7 @@ function remove(minute) {
             </form>
 
             <template #footer>
-                <button type="button" class="rounded-md px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100" @click="showModal = false">
+                <button type="button" class="rounded-md px-4 py-2 text-sm font-medium text-ink-600 hover:bg-ink-100" @click="showModal = false">
                     Cancelar
                 </button>
                 <button

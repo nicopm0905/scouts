@@ -59,7 +59,7 @@ function duplicate(activity) {
 
     <DataTable :columns="columns" :rows="activities" persist-key="activities" placeholder="Buscar por título…">
         <template #filters>
-            <select v-model="filterForm.branch" class="rounded-md border-slate-300 text-sm" @change="applyFilters">
+            <select v-model="filterForm.branch" class="rounded-md border-ink-300 text-sm" @change="applyFilters">
                 <option value="">Todas las ramas</option>
                 <option v-for="b in branches" :key="b.value" :value="b.value">{{ b.label }}</option>
             </select>
@@ -67,31 +67,31 @@ function duplicate(activity) {
                 v-model="filterForm.min_duration"
                 type="number"
                 placeholder="Min. min"
-                class="w-24 rounded-md border-slate-300 text-sm"
+                class="w-24 rounded-md border-ink-300 text-sm"
                 @change="applyFilters"
             />
             <input
                 v-model="filterForm.max_duration"
                 type="number"
                 placeholder="Máx. min"
-                class="w-24 rounded-md border-slate-300 text-sm"
+                class="w-24 rounded-md border-ink-300 text-sm"
                 @change="applyFilters"
             />
             <input
                 v-model="filterForm.material"
                 type="text"
                 placeholder="Material…"
-                class="w-32 rounded-md border-slate-300 text-sm"
+                class="w-32 rounded-md border-ink-300 text-sm"
                 @change="applyFilters"
             />
         </template>
         <template #cell-materials="{ value }">
-            <span class="text-xs text-slate-500">{{ value.join(', ') || '—' }}</span>
+            <span class="text-xs text-ink-500">{{ value.join(', ') || '—' }}</span>
         </template>
         <template #actions="{ row }">
             <div class="flex justify-end gap-3">
                 <Link :href="route('activities.show', row.id)" class="text-brand-700 hover:underline">Ver</Link>
-                <button v-if="canManage" class="text-slate-500 hover:underline" @click="duplicate(row)">Duplicar</button>
+                <button v-if="canManage" class="text-ink-500 hover:underline" @click="duplicate(row)">Duplicar</button>
             </div>
         </template>
         <template #empty>No se han encontrado actividades.</template>

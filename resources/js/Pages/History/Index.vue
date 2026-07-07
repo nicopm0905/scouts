@@ -93,7 +93,7 @@ function destroyEntry(entry) {
             <div
                 v-for="entry in entries"
                 :key="entry.id"
-                class="flex flex-col gap-3 rounded-lg border border-slate-200 bg-white p-4 sm:flex-row sm:items-center"
+                class="flex flex-col gap-3 rounded-lg border border-ink-200 bg-white p-4 sm:flex-row sm:items-center"
             >
                 <img
                     v-if="entry.photo_thumbnail_url"
@@ -104,12 +104,12 @@ function destroyEntry(entry) {
                 <div class="flex-1">
                     <div class="flex items-center gap-2">
                         <span class="text-sm font-bold text-brand-700">{{ entry.year }}</span>
-                        <span class="font-semibold text-slate-800">{{ entry.title }}</span>
-                        <span v-if="!entry.published" class="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-500">
+                        <span class="font-semibold text-ink-800">{{ entry.title }}</span>
+                        <span v-if="!entry.published" class="rounded-full bg-ink-100 px-2 py-0.5 text-xs text-ink-500">
                             Borrador
                         </span>
                     </div>
-                    <p v-if="entry.body" class="mt-1 text-sm text-slate-500">{{ entry.body }}</p>
+                    <p v-if="entry.body" class="mt-1 text-sm text-ink-500">{{ entry.body }}</p>
                 </div>
                 <div v-if="can('history.manage')" class="flex items-center gap-3">
                     <button type="button" class="text-xs font-medium text-brand-700 hover:underline" @click="openEdit(entry)">
@@ -125,7 +125,7 @@ function destroyEntry(entry) {
                 </div>
             </div>
         </div>
-        <p v-else class="rounded-lg border border-dashed border-slate-300 p-8 text-center text-slate-400">
+        <p v-else class="rounded-lg border border-dashed border-ink-300 p-8 text-center text-ink-400">
             Todavía no hay entradas de historia.
         </p>
 
@@ -138,14 +138,14 @@ function destroyEntry(entry) {
                 <FormField v-model="form.title" label="Título" required :error="form.errors.title" />
                 <FormField v-model="form.body" type="textarea" label="Texto" :error="form.errors.body" />
                 <div>
-                    <label class="block text-sm font-medium text-slate-700">Foto (opcional)</label>
+                    <label class="block text-sm font-medium text-ink-700">Foto (opcional)</label>
                     <input type="file" accept="image/*" class="mt-1 block w-full text-sm" @change="form.photo = $event.target.files[0]" />
                     <p v-if="form.errors.photo" class="mt-1 text-xs text-red-600">{{ form.errors.photo }}</p>
                 </div>
                 <FormField v-model="form.published" type="checkbox" placeholder="Publicada en la página pública" />
             </form>
             <template #footer>
-                <button type="button" class="rounded-md px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100" @click="showForm = false">
+                <button type="button" class="rounded-md px-4 py-2 text-sm font-medium text-ink-600 hover:bg-ink-100" @click="showForm = false">
                     Cancelar
                 </button>
                 <button

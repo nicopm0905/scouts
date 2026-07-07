@@ -69,7 +69,7 @@ function unlinkObjective(objectiveId) {
 
     <PageHeader :title="activity.title" :subtitle="`${activity.branch_label} · ${activity.duration_minutes ?? '—'} min`">
         <template #actions>
-            <button v-if="canManage" class="rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200" @click="duplicate">
+            <button v-if="canManage" class="rounded-md bg-ink-100 px-4 py-2 text-sm font-medium text-ink-700 hover:bg-ink-200" @click="duplicate">
                 Duplicar
             </button>
             <Link v-if="canManage" :href="route('activities.edit', activity.id)" class="rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700">
@@ -85,16 +85,16 @@ function unlinkObjective(objectiveId) {
 
     <div class="grid gap-4 lg:grid-cols-3">
         <div class="space-y-4 lg:col-span-2">
-            <div class="rounded-lg border border-slate-200 bg-white p-4">
-                <h3 class="mb-2 font-semibold text-slate-700">Objetivos educativos</h3>
-                <p class="whitespace-pre-line text-sm text-slate-600">{{ activity.objectives_text || 'Sin especificar.' }}</p>
+            <div class="rounded-lg border border-ink-200 bg-white p-4">
+                <h3 class="mb-2 font-semibold text-ink-700">Objetivos educativos</h3>
+                <p class="whitespace-pre-line text-sm text-ink-600">{{ activity.objectives_text || 'Sin especificar.' }}</p>
             </div>
-            <div class="rounded-lg border border-slate-200 bg-white p-4">
-                <h3 class="mb-2 font-semibold text-slate-700">Desarrollo</h3>
-                <p class="whitespace-pre-line text-sm text-slate-600">{{ activity.development || 'Sin especificar.' }}</p>
+            <div class="rounded-lg border border-ink-200 bg-white p-4">
+                <h3 class="mb-2 font-semibold text-ink-700">Desarrollo</h3>
+                <p class="whitespace-pre-line text-sm text-ink-600">{{ activity.development || 'Sin especificar.' }}</p>
             </div>
-            <div v-if="activity.attachments.length" class="rounded-lg border border-slate-200 bg-white p-4">
-                <h3 class="mb-2 font-semibold text-slate-700">Adjuntos</h3>
+            <div v-if="activity.attachments.length" class="rounded-lg border border-ink-200 bg-white p-4">
+                <h3 class="mb-2 font-semibold text-ink-700">Adjuntos</h3>
                 <ul class="space-y-1 text-sm">
                     <li v-for="a in activity.attachments" :key="a.id">
                         <a :href="a.web_view_link" target="_blank" class="text-brand-700 hover:underline">{{ a.id }}</a>
@@ -104,28 +104,28 @@ function unlinkObjective(objectiveId) {
         </div>
 
         <div class="space-y-4">
-            <div class="rounded-lg border border-slate-200 bg-white p-4">
-                <h3 class="mb-2 font-semibold text-slate-700">Materiales</h3>
-                <ul class="space-y-1 text-sm text-slate-600">
+            <div class="rounded-lg border border-ink-200 bg-white p-4">
+                <h3 class="mb-2 font-semibold text-ink-700">Materiales</h3>
+                <ul class="space-y-1 text-sm text-ink-600">
                     <li v-for="m in activity.materials" :key="m.id">
                         {{ m.name }} × {{ m.quantity }}
-                        <span v-if="m.inventory_item_name" class="text-xs text-slate-400">({{ m.inventory_item_name }})</span>
+                        <span v-if="m.inventory_item_name" class="text-xs text-ink-400">({{ m.inventory_item_name }})</span>
                     </li>
-                    <li v-if="activity.materials.length === 0" class="text-xs text-slate-400">Sin materiales.</li>
+                    <li v-if="activity.materials.length === 0" class="text-xs text-ink-400">Sin materiales.</li>
                 </ul>
             </div>
 
-            <div class="rounded-lg border border-slate-200 bg-white p-4">
-                <h3 class="mb-2 font-semibold text-slate-700">Eventos programados</h3>
-                <ul class="mb-3 space-y-1 text-sm text-slate-600">
+            <div class="rounded-lg border border-ink-200 bg-white p-4">
+                <h3 class="mb-2 font-semibold text-ink-700">Eventos programados</h3>
+                <ul class="mb-3 space-y-1 text-sm text-ink-600">
                     <li v-for="e in activity.events" :key="e.id" class="flex items-center justify-between">
                         <span>{{ e.title }}</span>
                         <button v-if="canManage" class="text-xs text-red-600 hover:underline" @click="unlinkEvent(e.id)">Quitar</button>
                     </li>
-                    <li v-if="activity.events.length === 0" class="text-xs text-slate-400">Sin eventos programados.</li>
+                    <li v-if="activity.events.length === 0" class="text-xs text-ink-400">Sin eventos programados.</li>
                 </ul>
                 <div v-if="canManage" class="flex gap-2">
-                    <select v-model="selectedEvent" class="flex-1 rounded-md border-slate-300 text-sm">
+                    <select v-model="selectedEvent" class="flex-1 rounded-md border-ink-300 text-sm">
                         <option value="">Elegir evento…</option>
                         <option v-for="e in availableEvents" :key="e.id" :value="e.id">{{ e.title }}</option>
                     </select>
@@ -135,17 +135,17 @@ function unlinkObjective(objectiveId) {
                 </div>
             </div>
 
-            <div class="rounded-lg border border-slate-200 bg-white p-4">
-                <h3 class="mb-2 font-semibold text-slate-700">Objetivos del plan vinculados</h3>
-                <ul class="mb-3 space-y-1 text-sm text-slate-600">
+            <div class="rounded-lg border border-ink-200 bg-white p-4">
+                <h3 class="mb-2 font-semibold text-ink-700">Objetivos del plan vinculados</h3>
+                <ul class="mb-3 space-y-1 text-sm text-ink-600">
                     <li v-for="o in activity.objectives" :key="o.id" class="flex items-center justify-between">
                         <span>{{ o.plan_label }}: {{ o.description }}</span>
                         <button v-if="canManage" class="text-xs text-red-600 hover:underline" @click="unlinkObjective(o.id)">Quitar</button>
                     </li>
-                    <li v-if="activity.objectives.length === 0" class="text-xs text-slate-400">Sin vincular.</li>
+                    <li v-if="activity.objectives.length === 0" class="text-xs text-ink-400">Sin vincular.</li>
                 </ul>
                 <div v-if="canManage" class="flex gap-2">
-                    <select v-model="selectedObjective" class="flex-1 rounded-md border-slate-300 text-sm">
+                    <select v-model="selectedObjective" class="flex-1 rounded-md border-ink-300 text-sm">
                         <option value="">Elegir objetivo…</option>
                         <option v-for="o in availableObjectives" :key="o.id" :value="o.id">{{ o.label }}</option>
                     </select>

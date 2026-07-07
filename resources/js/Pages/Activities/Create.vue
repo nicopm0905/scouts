@@ -52,7 +52,7 @@ function submit() {
 
     <PageHeader title="Nueva actividad" subtitle="Añade una actividad reutilizable a la biblioteca." />
 
-    <form class="max-w-2xl space-y-4 rounded-lg border border-slate-200 bg-white p-4 sm:p-6" @submit.prevent="submit">
+    <form class="max-w-2xl space-y-4 rounded-lg border border-ink-200 bg-white p-4 sm:p-6" @submit.prevent="submit">
         <FormField v-model="form.title" label="Título" :error="form.errors.title" required />
         <FormField
             v-model="form.branch"
@@ -66,21 +66,21 @@ function submit() {
         <FormField v-model="form.development" type="textarea" label="Desarrollo (markdown)" :error="form.errors.development" />
 
         <div>
-            <label class="block text-sm font-medium text-slate-700">Adjuntos</label>
+            <label class="block text-sm font-medium text-ink-700">Adjuntos</label>
             <input type="file" multiple class="mt-1 block w-full text-sm" @change="onFiles" />
         </div>
 
         <div>
             <div class="mb-2 flex items-center justify-between">
-                <label class="block text-sm font-medium text-slate-700">Materiales</label>
+                <label class="block text-sm font-medium text-ink-700">Materiales</label>
                 <button type="button" class="text-xs font-medium text-brand-700 hover:underline" @click="addMaterial">
                     + Añadir material
                 </button>
             </div>
             <div v-for="(m, i) in form.materials" :key="i" class="mb-2 flex flex-wrap items-center gap-2">
-                <input v-model="m.name" type="text" placeholder="Nombre" class="flex-1 rounded-md border-slate-300 text-sm" />
-                <input v-model.number="m.quantity" type="number" min="1" placeholder="Cant." class="w-20 rounded-md border-slate-300 text-sm" />
-                <select v-model="m.inventory_item_id" class="w-40 rounded-md border-slate-300 text-sm">
+                <input v-model="m.name" type="text" placeholder="Nombre" class="flex-1 rounded-md border-ink-300 text-sm" />
+                <input v-model.number="m.quantity" type="number" min="1" placeholder="Cant." class="w-20 rounded-md border-ink-300 text-sm" />
+                <select v-model="m.inventory_item_id" class="w-40 rounded-md border-ink-300 text-sm">
                     <option value="">Sin vincular</option>
                     <option v-for="opt in inventoryItems" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
                 </select>
