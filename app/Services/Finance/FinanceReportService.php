@@ -78,7 +78,40 @@ class FinanceReportService
             'total_income' => $totalIncome,
             'total_expense' => $totalExpense,
             'balance' => round($totalIncome - $totalExpense, 2),
+            'monthly' => $this->monthlySeries($from, $to, $paidCharges, $issuedInvoices, $receivedInvoices),
         ];
+    }
+
+    /**
+     * Serie mensual de ingresos vs gastos (para las gráficas). Se calcula sobre las
+     * colecciones ya cargadas, sin consultas extra. Máximo 24 meses.
+     */
+    private function monthlySeries(Carbon $from, Carbon $to, Collection $paidCharges, Collection $issued, Collection $received): array
+    {
+        $series = [];
+        $cursor = $from->copy()->startOfMonth();
+        $end = $to->copy()->endOfMonth();
+
+        while ($cursor <= $end && count($series) < 24) {
+            $y = $cursor->year;
+            $m = $cursor->month;
+
+            $income = $paidCharges->filter(fn (ChargeMember $cm) => $cm->paid_at && $cm->paid_at->year === $y && $cm->paid_at->month === $m)->sum('amount')
+                + $issued->filter(fn (Invoice $i) => $i->date->year === $y && $i->date->month === $m)->sum(fn (Invoice $i) => (float) $i->amount + (float) $i->vat);
+
+            $expense = $received->filter(fn (Invoice $i) => $i->date->year === $y && $i->date->month === $m)
+                ->sum(fn (Invoice $i) => (float) $i->amount + (float) $i->vat);
+
+            $series[] = [
+                'label' => $cursor->locale('es')->isoFormat('MMM YY'),
+                'income' => round((float) $income, 2),
+                'expense' => round((float) $expense, 2),
+            ];
+
+            $cursor->addMonth();
+        }
+
+        return $series;
     }
 
     /** Filas planas (ingreso/gasto, categoría, importe) listas para exportar a CSV. */

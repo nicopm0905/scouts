@@ -36,8 +36,8 @@ function submit() {
         <PageHeader title="Ajustes" subtitle="Datos fiscales del grupo, descuento por hermanos y recordatorios de pago." />
 
         <form class="max-w-2xl space-y-6" @submit.prevent="submit">
-            <section class="rounded-lg border border-slate-200 bg-white p-4">
-                <h2 class="mb-4 text-sm font-semibold text-slate-700">Datos fiscales del grupo</h2>
+            <section class="card-pad">
+                <h2 class="section-title mb-4">Datos fiscales del grupo</h2>
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <FormField v-model="form.group_name" label="Nombre del grupo" required :error="form.errors.group_name" />
                     <FormField v-model="form.group_tax_id" label="NIF/CIF" :error="form.errors.group_tax_id" />
@@ -49,8 +49,8 @@ function submit() {
                 </div>
             </section>
 
-            <section class="rounded-lg border border-slate-200 bg-white p-4">
-                <h2 class="mb-4 text-sm font-semibold text-slate-700">Cobros</h2>
+            <section class="card-pad">
+                <h2 class="section-title mb-4">Cobros</h2>
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <FormField
                         v-model="form.sibling_discount_percent"
@@ -69,13 +69,7 @@ function submit() {
                 </div>
             </section>
 
-            <button
-                type="submit"
-                class="rounded-md bg-brand-600 px-5 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
-                :disabled="form.processing"
-            >
-                Guardar ajustes
-            </button>
+            <button type="submit" class="btn-primary" :disabled="form.processing">Guardar ajustes</button>
         </form>
     </AppLayout>
 </template>
