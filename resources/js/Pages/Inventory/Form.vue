@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import { useForm } from '@inertiajs/vue3'
+import { Head, useForm } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import PageHeader from '@/Components/Shared/PageHeader.vue'
 import FormField from '@/Components/Shared/FormField.vue'
@@ -43,10 +43,11 @@ function onPhotoChange(e) {
 </script>
 
 <template>
+    <Head :title="isEdit ? 'Editar ítem' : 'Nuevo ítem'" />
     <AppLayout>
         <PageHeader :title="isEdit ? 'Editar ítem' : 'Nuevo ítem'" subtitle="Datos del material de inventario." />
 
-        <form class="max-w-2xl space-y-4 rounded-lg border border-slate-200 bg-white p-4 sm:p-6" @submit.prevent="submit">
+        <form class="max-w-2xl space-y-4 card-pad" @submit.prevent="submit">
             <FormField label="Nombre" v-model="form.name" required :error="form.errors.name" />
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -84,26 +85,18 @@ function onPhotoChange(e) {
             <FormField label="Notas" type="textarea" v-model="form.notes" :error="form.errors.notes" />
 
             <div>
-                <label class="block text-sm font-medium text-slate-700">Foto (opcional)</label>
-                <img v-if="item?.photo_url" :src="item.photo_url" class="mt-2 h-20 w-20 rounded object-cover" alt="" />
-                <input type="file" accept="image/*" class="mt-1 block w-full text-sm" @change="onPhotoChange" />
-                <label v-if="item?.photo_url" class="mt-2 inline-flex items-center gap-2 text-sm text-slate-600">
-                    <input type="checkbox" v-model="form.remove_photo" /> Quitar foto actual
+                <label class="label">Foto (opcional)</label>
+                <img v-if="item?.photo_url" :src="item.photo_url" class="mt-2 h-20 w-20 rounded-lg object-cover" alt="" />
+                <input type="file" accept="image/*" class="mt-1 block w-full text-sm text-ink-600" @change="onPhotoChange" />
+                <label v-if="item?.photo_url" class="mt-2 inline-flex items-center gap-2 text-sm text-ink-600">
+                    <input type="checkbox" v-model="form.remove_photo" class="rounded border-ink-300 text-brand-600 focus:ring-brand-500" /> Quitar foto actual
                 </label>
-                <p v-if="form.errors.photo" class="mt-1 text-xs text-red-600">{{ form.errors.photo }}</p>
+                <p v-if="form.errors.photo" class="mt-1 text-xs text-brand-600">{{ form.errors.photo }}</p>
             </div>
 
             <div class="flex justify-end gap-2 pt-2">
-                <a :href="route('inventory.index')" class="rounded-md px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100">
-                    Cancelar
-                </a>
-                <button
-                    type="submit"
-                    class="rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
-                    :disabled="form.processing"
-                >
-                    Guardar
-                </button>
+                <a :href="route('inventory.index')" class="btn-ghost">Cancelar</a>
+                <button type="submit" class="btn-primary" :disabled="form.processing">Guardar</button>
             </div>
         </form>
     </AppLayout>
