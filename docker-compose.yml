@@ -13,13 +13,9 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    environment:
-      DB_CONNECTION: pgsql
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_DATABASE: scouts
-      DB_USERNAME: scouts
-      DB_PASSWORD: secret
+    # La configuración de BD vive en .env (DB_HOST=db). NO definir DB_* aquí: se
+    # convertirían en variables de entorno del SO y anularían el sqlite de phpunit,
+    # haciendo que los tests borren la base de datos de desarrollo.
     command: sh -c "php artisan serve --host=0.0.0.0 --port=8000"
 
   # Servidor de desarrollo de Vite (Hot Module Replacement). NO arranca por defecto:
@@ -49,13 +45,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    environment:
-      DB_CONNECTION: pgsql
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_DATABASE: scouts
-      DB_USERNAME: scouts
-      DB_PASSWORD: secret
     command: sh -c "php artisan queue:work --tries=3 --sleep=3"
 
   db:
