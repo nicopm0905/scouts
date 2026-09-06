@@ -1,44 +1,59 @@
-FROM php:8.3-fpm
+FROM php:8.4-fpm
 
 WORKDIR /var/www
 
-# Install system dependencies and PHP extensions
+# --- Dependencias de sistema y extensiones PHP ---
 RUN apt-get update && apt-get install -y \
     git \
     curl \
+    unzip \
     libpq-dev \
     libicu-dev \
     zlib1g-dev \
     libzip-dev \
     && docker-php-ext-configure zip \
-    && docker-php-ext-install \
+    && docker-php-ext-install -j"$(nproc)" \
     pdo \
     pdo_pgsql \
     intl \
     zip \
+    opcache \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Node.js
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
-    && apt-get install -y nodejs
+# --- Node.js 20 (para compilar los assets con Vite) ---
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install Composer
+# --- Composer ---
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Copy project files
+# --- Dependencias PHP (capa cacheable) ---
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --no-interaction
+
+# --- Dependencias Node (capa cacheable) ---
+COPY package.json package-lock.json ./
+RUN npm ci
+
+# --- Código de la aplicación ---
 COPY . .
 
-# Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader
+# --- Autoloader optimizado + descubrimiento de paquetes ---
+RUN composer dump-autoload --no-dev --optimize \
+    && php artisan package:discover --ansi
 
-# Install Node dependencies (build should be done locally before deployment)
-RUN npm install
+# --- Compilar assets de frontend ---
+RUN npm run build \
+    && rm -rf node_modules
 
-# Run migrations (optional - may fail if DB not ready, but that's ok)
-RUN php artisan migrate:fresh --force --no-interaction || true
+# --- Permisos de escritura para Laravel ---
+RUN chown -R www-data:www-data storage bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
 
-# Expose port
+# --- Arranque: migraciones + servidor ---
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
 EXPOSE 8000
-
-# Start Laravel
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+ENTRYPOINT ["entrypoint.sh"]
