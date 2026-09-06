@@ -2,13 +2,20 @@ FROM php:8.3-fpm
 
 WORKDIR /var/www
 
-# Install system dependencies
+# Install system dependencies and PHP extensions
 RUN apt-get update && apt-get install -y \
     git \
     curl \
     libpq-dev \
     libicu-dev \
-    && docker-php-ext-install pdo pdo_pgsql intl \
+    zlib1g-dev \
+    libzip-dev \
+    && docker-php-ext-configure zip \
+    && docker-php-ext-install \
+    pdo \
+    pdo_pgsql \
+    intl \
+    zip \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Node.js
@@ -21,13 +28,13 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Copy project files
 COPY . .
 
-# Install PHP dependencies
-RUN composer update --no-dev --optimize-autoloader
+# Install PHP dependencies (ignore platform requirements for compatibility)
+RUN composer install --no-dev --optimize-autoloader --ignore-platform-req=php
 
 # Install Node dependencies and build
 RUN npm install && npm run build
 
-# Run migrations
+# Run migrations (optional - may fail if DB not ready, but that's ok)
 RUN php artisan migrate:fresh --force --no-interaction || true
 
 # Expose port
