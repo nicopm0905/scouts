@@ -9,6 +9,9 @@ php artisan view:cache
 # Migraciones (idempotente; nunca borra datos)
 php artisan migrate --force --no-interaction || true
 
+# Roles/permisos + cuenta de coordinación (idempotente)
+php artisan db:seed --class=ProductionSeeder --force --no-interaction || true
+
 # Enlace de almacenamiento público
 php artisan storage:link || true
 
