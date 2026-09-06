@@ -31,8 +31,8 @@ COPY . .
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Install Node dependencies and build
-RUN npm install && npm run build
+# Install Node dependencies (build should be done locally before deployment)
+RUN npm install
 
 # Run migrations (optional - may fail if DB not ready, but that's ok)
 RUN php artisan migrate:fresh --force --no-interaction || true
