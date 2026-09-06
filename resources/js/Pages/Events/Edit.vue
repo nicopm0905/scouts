@@ -19,7 +19,12 @@ const form = useForm({
     start_at: props.event.start_at?.slice(0, 16),
     end_at: props.event.end_at?.slice(0, 16) ?? '',
     location: props.event.location ?? '',
+    city: props.event.city ?? '',
     description: props.event.description ?? '',
+    theme: props.event.theme ?? '',
+    coordinator: props.event.coordinator ?? '',
+    eucharist: props.event.eucharist ?? false,
+    hike: props.event.hike ?? false,
     branches: [...(props.event.branches ?? [])],
 })
 
@@ -34,7 +39,7 @@ function submit() {
     <Head title="Editar evento" />
 
     <AppLayout>
-        <PageHeader title="Editar evento" :subtitle="event.title">
+        <PageHeader title="Editar evento" :subtitle="event.title" icon="calendar">
             <template #actions>
                 <Link :href="route('events.show', event.id)" class="text-sm text-slate-500 hover:text-slate-700">
                     ← Volver al evento

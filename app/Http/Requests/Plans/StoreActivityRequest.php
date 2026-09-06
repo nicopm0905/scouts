@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Plans;
 
 use App\Enums\MemberRole;
+use App\Models\Activity;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -10,7 +11,7 @@ class StoreActivityRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('create', \App\Models\Activity::class);
+        return $this->user()->can('create', Activity::class);
     }
 
     public function rules(): array
@@ -19,8 +20,12 @@ class StoreActivityRequest extends FormRequest
             'title' => ['required', 'string', 'max:255'],
             'branch' => ['nullable', Rule::in(MemberRole::values())],
             'duration_minutes' => ['nullable', 'integer', 'min:1'],
+            'day_number' => ['nullable', 'string', 'max:50'],
+            'time_slot' => ['nullable', 'string', 'max:50'],
+            'activity_number' => ['nullable', 'integer', 'min:1'],
             'objectives_text' => ['nullable', 'string'],
             'development' => ['nullable', 'string'],
+            'materials_text' => ['nullable', 'string'],
             'attachments' => ['nullable', 'array'],
             'attachments.*' => ['file', 'max:20480'],
             'materials' => ['nullable', 'array'],

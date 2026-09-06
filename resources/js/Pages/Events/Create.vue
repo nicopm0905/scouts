@@ -18,7 +18,12 @@ const form = useForm({
     start_at: '',
     end_at: '',
     location: '',
+    city: '',
     description: '',
+    theme: '',
+    coordinator: '',
+    eucharist: false,
+    hike: false,
     branches: [],
 })
 
@@ -33,7 +38,7 @@ function submit() {
     <Head title="Nuevo evento" />
 
     <AppLayout>
-        <PageHeader title="Nuevo evento" subtitle="Añade un evento al calendario del grupo.">
+        <PageHeader title="Nuevo evento" subtitle="Añade un evento al calendario del grupo." icon="calendarPlus">
             <template #actions>
                 <Link :href="route('events.index')" class="text-sm text-slate-500 hover:text-slate-700">
                     ← Volver al calendario

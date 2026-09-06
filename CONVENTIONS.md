@@ -64,8 +64,16 @@ tests/
 
 ## 7. Frontend (Vue 3 + Inertia)
 - Componentes compartidos en `resources/js/Components/Shared/`: **úsalos, no los dupliques**.
-  - `DataTable.vue` — tabla con búsqueda instantánea, filtros persistentes (query string), paginación.
-  - `Modal.vue`, `FormField.vue`, `BadgeEstado.vue`, `ConfirmButton.vue`, `PageHeader.vue`.
+  Son el sistema de diseño de la plataforma; si escribes marcado propio, la pantalla se sale del estilo común.
+  - `PageHeader.vue` — título, subtítulo, `icon` de sección y slots `actions` / `meta`.
+  - `DataTable.vue` — tabla con búsqueda instantánea, orden, filtros persistentes (query string) y
+    modo tarjeta automático en móvil. Slots: `cell-<key>`, `actions`, `filters`, `empty`.
+  - `AppButton.vue` — botón único (variantes primary/secondary/ghost/danger, tamaños sm/md, `icon`).
+  - `StatCard.vue` — tarjeta de cifra (KPI) con tono e icono; admite `href` para hacerla clicable.
+  - `SectionCard.vue` — caja de contenido con cabecera (icono, título, acciones).
+  - `EmptyState.vue`, `SearchInput.vue`, `FilterSelect.vue`, `DashIcon.vue` (iconos de línea).
+  - `Modal.vue`, `FormField.vue`, `BadgeEstado.vue`, `BadgeRama.vue`, `ConfirmButton.vue`.
+  - Nada de emojis como iconos de interfaz: usa `DashIcon`.
   - Toasts: `useToast()` (composable) → `toast.success('Guardado')`. Nada de `alert()`.
 - **Móvil primero.** Tailwind, breakpoints `sm/md/lg`. Acciones frecuentes ≤ 2 clics.
 - Nada de páginas de confirmación innecesarias: usar toast + deshacer donde aplique.

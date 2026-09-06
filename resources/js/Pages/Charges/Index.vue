@@ -5,6 +5,9 @@ import AppLayout from '@/Layouts/AppLayout.vue'
 import PageHeader from '@/Components/Shared/PageHeader.vue'
 import DataTable from '@/Components/Shared/DataTable.vue'
 import Modal from '@/Components/Shared/Modal.vue'
+import StatCard from '@/Components/Shared/StatCard.vue'
+import AppButton from '@/Components/Shared/AppButton.vue'
+import SectionCard from '@/Components/Shared/SectionCard.vue'
 import FormField from '@/Components/Shared/FormField.vue'
 import { useToast } from '@/composables/useToast'
 import { useAuth } from '@/composables/useAuth'
@@ -25,9 +28,9 @@ const memberFilter = ref('')
 const eur = (n) => Number(n ?? 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €'
 
 const kpis = computed(() => [
-    { label: 'Recaudado', value: eur(props.summary.collected), tone: 'text-emerald-600', sub: `${props.summary.collection_rate ?? 0}% del total` },
-    { label: 'Pendiente', value: eur(props.summary.pending), tone: 'text-brand-600', sub: `${props.summary.pending_count ?? 0} pagos sin cerrar` },
-    { label: 'Total previsto', value: eur(props.summary.expected), tone: 'text-ink-800', sub: `${props.summary.charges_count ?? 0} cobros` },
+    { label: 'Recaudado', value: eur(props.summary.collected), tone: 'positive', icon: 'check', hint: `${props.summary.collection_rate ?? 0}% del total` },
+    { label: 'Pendiente', value: eur(props.summary.pending), tone: 'danger', icon: 'clock', hint: `${props.summary.pending_count ?? 0} pagos sin cerrar` },
+    { label: 'Total previsto', value: eur(props.summary.expected), tone: 'neutral', icon: 'euro', hint: `${props.summary.charges_count ?? 0} cobros` },
 ])
 
 const columns = [
@@ -75,32 +78,41 @@ function submit() {
 <template>
     <Head title="Cobros" />
     <AppLayout>
-        <PageHeader title="Cobros" subtitle="Cuotas, salidas y campamentos repartidos por rama o por miembro.">
+        <PageHeader title="Cobros" subtitle="Cuotas, salidas y campamentos repartidos por rama o por miembro." icon="euro">
             <template #actions>
-                <Link :href="route('finance.report')" class="btn-secondary btn-sm">📊 Informe</Link>
-                <button v-if="can('charges.manage')" class="btn-primary btn-sm" @click="showCreate = true">+ Nuevo cobro</button>
+                <AppButton :href="route('finance.report')" icon="chart">Informe</AppButton>
+                <AppButton v-if="can('charges.manage')" variant="primary" icon="plus" @click="showCreate = true">
+                    Nuevo cobro
+                </AppButton>
             </template>
         </PageHeader>
 
-        <!-- KPIs -->
-        <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div v-for="k in kpis" :key="k.label" class="card p-4">
-                <p class="section-title">{{ k.label }}</p>
-                <p class="mt-1 text-2xl font-bold" :class="k.tone">{{ k.value }}</p>
-                <p class="mt-0.5 text-xs text-ink-400">{{ k.sub }}</p>
-            </div>
+        <!-- Cifras del curso -->
+        <div class="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <StatCard
+                v-for="k in kpis"
+                :key="k.label"
+                :label="k.label"
+                :value="k.value"
+                :hint="k.hint"
+                :tone="k.tone"
+                :icon="k.icon"
+            />
         </div>
 
         <!-- Barra de recaudación global -->
-        <div v-if="summary.expected > 0" class="mb-6 card p-4">
-            <div class="mb-1.5 flex items-center justify-between text-sm">
-                <span class="font-medium text-ink-700">Recaudación global</span>
-                <span class="text-ink-500">{{ eur(summary.collected) }} de {{ eur(summary.expected) }}</span>
+        <SectionCard v-if="summary.expected > 0" class="mb-5">
+            <div class="mb-2 flex items-center justify-between text-sm">
+                <span class="font-semibold text-slate-700">Recaudación global</span>
+                <span class="font-medium text-slate-500">{{ eur(summary.collected) }} de {{ eur(summary.expected) }}</span>
             </div>
-            <div class="h-2.5 w-full overflow-hidden rounded-full bg-ink-100">
-                <div class="h-full rounded-full bg-emerald-500 transition-all" :style="{ width: (summary.collection_rate ?? 0) + '%' }" />
+            <div class="h-2.5 w-full overflow-hidden rounded-full bg-slate-100">
+                <div
+                    class="h-full rounded-full bg-emerald-500 transition-[width] duration-700 ease-out"
+                    :style="{ width: (summary.collection_rate ?? 0) + '%' }"
+                />
             </div>
-        </div>
+        </SectionCard>
 
         <DataTable :columns="columns" :rows="rows" persist-key="charges" placeholder="Buscar cobro…">
             <template #cell-total_expected="{ value }">{{ eur(value) }}</template>
@@ -114,7 +126,7 @@ function submit() {
                 </div>
             </template>
             <template #actions="{ row }">
-                <Link :href="route('charges.show', row.id)" class="text-sm font-medium text-brand-700 hover:underline">Ver control</Link>
+                <AppButton :href="route('charges.show', row.id)" size="sm" icon-right="chevron">Ver control</AppButton>
             </template>
         </DataTable>
 
@@ -155,8 +167,8 @@ function submit() {
             </form>
 
             <template #footer>
-                <button class="btn-ghost" @click="showCreate = false">Cancelar</button>
-                <button class="btn-primary" :disabled="form.processing" @click="submit">Crear cobro</button>
+                <AppButton variant="ghost" @click="showCreate = false">Cancelar</AppButton>
+                <AppButton variant="primary" :loading="form.processing" @click="submit">Crear cobro</AppButton>
             </template>
         </Modal>
     </AppLayout>

@@ -1,56 +1,46 @@
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import DeleteUserForm from './Partials/DeleteUserForm.vue';
-import UpdatePasswordForm from './Partials/UpdatePasswordForm.vue';
-import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm.vue';
-import { Head } from '@inertiajs/vue3';
+import { computed } from 'vue'
+import { Head, usePage } from '@inertiajs/vue3'
+import AppLayout from '@/Layouts/AppLayout.vue'
+import PortalLayout from '@/Layouts/PortalLayout.vue'
+import PageHeader from '@/Components/Shared/PageHeader.vue'
+import DeleteUserForm from './Partials/DeleteUserForm.vue'
+import UpdatePasswordForm from './Partials/UpdatePasswordForm.vue'
+import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm.vue'
 
 defineProps({
-    mustVerifyEmail: {
-        type: Boolean,
-    },
-    status: {
-        type: String,
-    },
-});
+    mustVerifyEmail: { type: Boolean },
+    status: { type: String },
+})
+
+// El portal de familias y el panel de gestión usan layouts distintos.
+const isFamilia = computed(() => usePage().props.auth?.user?.is_familia === true)
+const Layout = computed(() => (isFamilia.value ? PortalLayout : AppLayout))
 </script>
 
 <template>
-    <Head title="Profile" />
+    <Head title="Mi cuenta" />
 
-    <AuthenticatedLayout>
-        <template #header>
-            <h2
-                class="text-xl font-semibold leading-tight text-gray-800"
-            >
-                Profile
-            </h2>
-        </template>
+    <component :is="Layout">
+        <PageHeader v-if="!isFamilia" title="Mi cuenta" icon="cog" />
+        <h1 v-else class="text-2xl font-extrabold tracking-tight text-slate-900">Mi cuenta</h1>
 
-        <div class="py-12">
-            <div class="mx-auto max-w-7xl space-y-6 sm:px-6 lg:px-8">
-                <div
-                    class="bg-white p-4 shadow sm:rounded-lg sm:p-8"
-                >
-                    <UpdateProfileInformationForm
-                        :must-verify-email="mustVerifyEmail"
-                        :status="status"
-                        class="max-w-xl"
-                    />
-                </div>
+        <div class="mt-6 space-y-6">
+            <div class="rounded-lg border border-slate-200 bg-white p-6">
+                <UpdateProfileInformationForm
+                    :must-verify-email="mustVerifyEmail"
+                    :status="status"
+                    class="max-w-xl"
+                />
+            </div>
 
-                <div
-                    class="bg-white p-4 shadow sm:rounded-lg sm:p-8"
-                >
-                    <UpdatePasswordForm class="max-w-xl" />
-                </div>
+            <div class="rounded-lg border border-slate-200 bg-white p-6">
+                <UpdatePasswordForm class="max-w-xl" />
+            </div>
 
-                <div
-                    class="bg-white p-4 shadow sm:rounded-lg sm:p-8"
-                >
-                    <DeleteUserForm class="max-w-xl" />
-                </div>
+            <div class="rounded-lg border border-slate-200 bg-white p-6">
+                <DeleteUserForm class="max-w-xl" />
             </div>
         </div>
-    </AuthenticatedLayout>
+    </component>
 </template>

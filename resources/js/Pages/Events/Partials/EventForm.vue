@@ -48,15 +48,46 @@ function toggleBranch(value) {
             />
         </div>
 
-        <FormField
-            v-model="form.location"
-            label="Lugar"
-            :error="form.errors.location"
-        />
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <FormField
+                v-model="form.location"
+                label="Lugar (Instalación)"
+                :error="form.errors.location"
+            />
+            <FormField
+                v-model="form.city"
+                label="Pueblo/Ciudad"
+                :error="form.errors.city"
+            />
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <FormField
+                v-model="form.theme"
+                label="Ambientación / Temática"
+                :error="form.errors.theme"
+            />
+            <FormField
+                v-model="form.coordinator"
+                label="Coordinador/a"
+                :error="form.errors.coordinator"
+            />
+        </div>
+
+        <div class="flex items-center gap-6 py-2">
+            <label class="flex items-center gap-2 text-sm font-medium text-slate-700 cursor-pointer">
+                <input type="checkbox" v-model="form.eucharist" class="rounded border-slate-300 text-brand-600 focus:ring-brand-600" />
+                <span>¿Hay Eucaristía?</span>
+            </label>
+            <label class="flex items-center gap-2 text-sm font-medium text-slate-700 cursor-pointer">
+                <input type="checkbox" v-model="form.hike" class="rounded border-slate-300 text-brand-600 focus:ring-brand-600" />
+                <span>¿Hay marcha / ruta?</span>
+            </label>
+        </div>
 
         <FormField
             v-model="form.description"
-            label="Descripción"
+            label="Descripción general"
             type="textarea"
             :error="form.errors.description"
         />

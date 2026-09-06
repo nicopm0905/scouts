@@ -21,8 +21,12 @@ use RuntimeException;
 class GoogleDriveService implements DriveServiceInterface
 {
     private const TOKEN_URI = 'https://oauth2.googleapis.com/token';
+
+    // drive: permite ver y modificar carpetas creadas por otros usuarios y compartidas con la app.
     private const SCOPE = 'https://www.googleapis.com/auth/drive';
+
     private const API = 'https://www.googleapis.com/drive/v3';
+
     private const UPLOAD_API = 'https://www.googleapis.com/upload/drive/v3';
 
     /** @param array<string, mixed> $credentials */
@@ -71,12 +75,16 @@ class GoogleDriveService implements DriveServiceInterface
         return $this->toDriveFile($response->json());
     }
 
-    public function createFolder(string $name, ?string $parentId = null): string
+    public function createFolder(string $name, ?string $parentId = null, ?string $colorRgb = null): string
     {
         $metadata = [
             'name' => $name,
             'mimeType' => 'application/vnd.google-apps.folder',
         ];
+        if ($colorRgb) {
+            $metadata['folderColorRgb'] = $colorRgb;
+        }
+
         $parent = $parentId ?? $this->rootFolderId;
         if ($parent) {
             $metadata['parents'] = [$parent];
@@ -87,6 +95,30 @@ class GoogleDriveService implements DriveServiceInterface
             ->throw();
 
         return $response->json('id');
+    }
+
+    public function searchFolder(string $name, ?string $parentId = null): ?string
+    {
+        $parent = $parentId ?? $this->rootFolderId;
+        $query = "mimeType='application/vnd.google-apps.folder' and name='".str_replace("'", "\\'", $name)."' and trashed=false";
+
+        if ($parent) {
+            $query .= " and '{$parent}' in parents";
+        }
+
+        $response = $this->client()
+            ->get(self::API.'/files', [
+                'q' => $query,
+                'supportsAllDrives' => 'true',
+                'includeItemsFromAllDrives' => 'true',
+                'corpora' => 'allDrives',
+                'fields' => 'files(id)',
+            ])
+            ->throw();
+
+        $files = $response->json('files');
+
+        return ! empty($files) ? $files[0]['id'] : null;
     }
 
     public function download(string $fileId): string
@@ -113,7 +145,11 @@ class GoogleDriveService implements DriveServiceInterface
 
     public function thumbnailUrl(string $fileId): ?string
     {
-        return $this->getMetadata($fileId)?->thumbnailLink;
+        $link = $this->getMetadata($fileId)?->thumbnailLink;
+
+        // Aumenta el tamaño del thumbnail de Google Drive para mejor calidad (máximo 2000px).
+        // Por defecto Google Drive envía ~220px; pedimos 512px para un buen balance entre calidad y velocidad.
+        return $link ? str_replace('sz=220', 'sz=512', $link) : null;
     }
 
     public function webViewLink(string $fileId): ?string
@@ -149,7 +185,13 @@ class GoogleDriveService implements DriveServiceInterface
 
     private function client(): PendingRequest
     {
-        return Http::withToken($this->accessToken())->acceptJson();
+        $request = Http::withToken($this->accessToken())->acceptJson();
+
+        if (app()->environment('local')) {
+            $request->withoutVerifying();
+        }
+
+        return $request;
     }
 
     /** Obtiene (y cachea) un access token OAuth2 mediante el flujo JWT de service account. */
@@ -167,7 +209,12 @@ class GoogleDriveService implements DriveServiceInterface
                 'exp' => $now + 3600,
             ], $this->credentials['private_key'], 'RS256');
 
-            $response = Http::asForm()->post(self::TOKEN_URI, [
+            $request = Http::asForm();
+            if (app()->environment('local')) {
+                $request->withoutVerifying();
+            }
+
+            $response = $request->post(self::TOKEN_URI, [
                 'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
                 'assertion' => $jwt,
             ])->throw();

@@ -16,6 +16,8 @@ class StoreObjectiveRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'development_area' => ['nullable', 'string', 'max:50'],
+            'content' => ['nullable', 'string'],
             'description' => ['required', 'string'],
             'term' => ['nullable', 'integer', 'between:1,3'],
             'status' => ['nullable', Rule::in(ObjectiveStatus::values())],

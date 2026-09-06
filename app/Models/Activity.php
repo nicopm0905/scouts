@@ -14,6 +14,7 @@ class Activity extends Model
 
     protected $fillable = [
         'title', 'branch', 'duration_minutes', 'objectives_text',
+        'day_number', 'time_slot', 'activity_number', 'materials_text',
         'development', 'attachment_file_ids', 'created_by',
     ];
 

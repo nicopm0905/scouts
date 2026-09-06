@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Event extends Model
@@ -17,7 +18,8 @@ class Event extends Model
 
     protected $fillable = [
         'title', 'type', 'start_at', 'end_at', 'location',
-        'description', 'branches', 'created_by',
+        'description', 'drive_folder_id', 'branches', 'created_by',
+        'coordinator_id', 'location_city', 'has_eucharist', 'has_hike', 'theme_description',
     ];
 
     protected $casts = [
@@ -25,11 +27,18 @@ class Event extends Model
         'start_at' => 'datetime',
         'end_at' => 'datetime',
         'branches' => 'array',
+        'has_eucharist' => 'boolean',
+        'has_hike' => 'boolean',
     ];
 
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function coordinator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'coordinator_id');
     }
 
     /** Miembros inscritos (pivote event_member). */
@@ -58,6 +67,11 @@ class Event extends Model
     public function activities(): BelongsToMany
     {
         return $this->belongsToMany(Activity::class)->withTimestamps();
+    }
+
+    public function budget(): HasOne
+    {
+        return $this->hasOne(Budget::class);
     }
 
     public function albums(): HasMany

@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Route;
 | Prefijo de URI en inglés (convención del proyecto); textos de UI en español
 | vía lang/es/inventory.php.
 */
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('inventory', InventoryItemController::class)
         ->parameters(['inventory' => 'item'])
         ->names('inventory');

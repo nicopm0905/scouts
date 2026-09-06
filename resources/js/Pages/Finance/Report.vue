@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { Head, router } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import PageHeader from '@/Components/Shared/PageHeader.vue'
+import AppButton from '@/Components/Shared/AppButton.vue'
 
 const props = defineProps({
     report: { type: Object, required: true },
@@ -34,9 +35,9 @@ const maxExpense = computed(() => Math.max(1, ...props.report.expense.map((r) =>
 <template>
     <Head title="Informe económico" />
     <AppLayout>
-        <PageHeader title="Informe económico" subtitle="Ingresos y gastos por categoría y periodo (base de la memoria económica anual).">
+        <PageHeader title="Informe económico" subtitle="Ingresos y gastos por categoría y periodo (base de la memoria económica anual)." icon="chart">
             <template #actions>
-                <button class="btn-secondary btn-sm" @click="exportCsv">⬇ Exportar CSV</button>
+                <AppButton size="sm" icon="download" @click="exportCsv">Exportar CSV</AppButton>
             </template>
         </PageHeader>
 

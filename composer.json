@@ -7,15 +7,17 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
-        "barryvdh/laravel-dompdf": "*",
+        "barryvdh/laravel-dompdf": "^3.1",
+        "doctrine/dbal": "^4.0",
         "firebase/php-jwt": "^7.1",
         "inertiajs/inertia-laravel": "^2.0",
-        "laravel/breeze": "*",
+        "laravel/breeze": "^2.4",
         "laravel/framework": "^11.31",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
-        "spatie/laravel-activitylog": "*",
-        "spatie/laravel-permission": "*",
+        "spatie/laravel-activitylog": "^4.12",
+        "spatie/laravel-permission": "^6.25",
+        "spatie/simple-excel": "^3.10",
         "tightenco/ziggy": "^2.0"
     },
     "require-dev": {

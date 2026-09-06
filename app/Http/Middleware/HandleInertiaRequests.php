@@ -41,6 +41,8 @@ class HandleInertiaRequests extends Middleware
                     'branches' => $user->branches ?? [],
                     'roles' => $user->getRoleNames(),
                     'permissions' => $user->getAllPermissions()->pluck('name'),
+                    'is_familia' => $user->isFamilia(),
+                    'is_intendente' => $user->isIntendente(),
                 ] : null,
             ],
             // Mensajes flash -> toasts en el frontend.
@@ -51,6 +53,15 @@ class HandleInertiaRequests extends Middleware
             ],
             'app' => [
                 'name' => config('app.name'),
+            ],
+            // Datos del grupo usados por el layout público (cabecera y pie).
+            'group' => [
+                'name' => config('group.name'),
+                'short_name' => config('group.short_name'),
+                'tagline' => config('group.tagline'),
+                'federation' => config('group.federation'),
+                'contact' => config('group.contact'),
+                'social' => config('group.social'),
             ],
         ];
     }

@@ -147,6 +147,73 @@ Configura el correo (`MAIL_*`) en `.env` para el envío real.
 4. Activa el **Scheduler** de Forge (equivale al cron de arriba) y un **worker de cola**
    (Daemon: `php artisan queue:work --tries=3`).
 
+### Checklist de producción (obligatoria — datos de salud de menores, RGPD art. 9)
+
+- [ ] `APP_ENV=production` y `APP_DEBUG=false` (nunca exponer trazas con datos personales).
+- [ ] `APP_URL` con `https://` y certificado TLS válido (Forge/Let's Encrypt). La app fuerza
+      HTTPS (`URL::forceScheme`) y envía HSTS en producción.
+- [ ] `SESSION_SECURE_COOKIE=true` y `SESSION_ENCRYPT=true`.
+- [ ] `APP_KEY` generado y **respaldado en un lugar seguro**: los datos médicos se cifran con
+      esta clave; si se pierde, las fichas sanitarias son irrecuperables.
+- [ ] Si hay datos previos a la activación del cifrado, ejecutar una única vez
+      `php artisan health:encrypt-existing` (es idempotente; admite `--dry-run`).
+- [ ] Backups de base de datos **cifrados** y con acceso restringido (contienen categoría
+      especial de datos aunque los campos médicos ya vayan cifrados en reposo).
+- [ ] Revisar `activity_log` periódicamente (trazabilidad de accesos/cambios) y la política de
+      retención (`delete_records_older_than_days` en `config/activitylog.php`, 365 días).
+
+---
+
+> **Página en blanco al abrir http://localhost:8000**
+> Ocurre cuando el navegador no puede cargar los assets del servidor de Vite. Dos causas:
+> 1. **Vite no está arrancado** pero quedó el fichero `public/hot` de una ejecución anterior
+>    (pasa si se cierra la terminal en vez de parar el proceso con Ctrl+C). Solución: arranca
+>    `npm run dev`, o borra `public/hot` para servir los assets compilados de `public/build`.
+> 2. **CORS**: Vite 6 solo acepta peticiones del mismo origen. `vite.config.js` ya autoriza
+>    `localhost`/`127.0.0.1` en cualquier puerto (bloque `server.cors`); si cambias
+>    `server.origin`, mantén ese bloque o la web volverá a quedarse en blanco.
+>
+> Para diagnosticar: abre la consola del navegador. Si ves errores de CORS o `ERR_FAILED`
+> contra `localhost:5173`, es esto.
+
+## Web pública (landing)
+
+Además de la plataforma de gestión, la aplicación sirve el sitio público del grupo:
+
+| Ruta | Contenido |
+|------|-----------|
+| `/` | Portada: quiénes somos, secciones por edad, qué hacemos, galería, historia, únete, FAQ y contacto |
+| `/galeria` | Álbumes con `visibility = publishable` (respeta el consentimiento de imagen) |
+| `/historia` | Línea de tiempo con las entradas publicadas |
+| `/plataforma` | Presentación de la plataforma de gestión (antigua portada) |
+
+- **Todo el texto editable vive en `config/group.php`**: nombre, lema, contacto, redes, cifras,
+  secciones con sus edades, pilares, pasos para apuntarse y preguntas frecuentes. No hace falta
+  tocar componentes Vue para actualizar el contenido del curso.
+- **Fotos**: se colocan en `public/images/landing/` con los nombres que indica
+  `public/images/landing/LEEME.txt` (`hero.jpg`, `grupo.jpg`, `campamento.jpg`, `castores.jpg`…).
+  Si una foto no existe, la web dibuja automáticamente un fondo ilustrado en su lugar.
+  **Ojo con el HEIC**: las fotos del iPhone son HEIC aunque les cambies la extensión a `.jpg`
+  y ningún navegador las muestra. La portada valida la firma del fichero y las ignora
+  (queda un aviso en el log). Exporta como JPEG, o convierte:
+  `ffmpeg -i foto.heic -filter_complex "[0:g:0]scale=2400:-2[o]" -map "[o]" -q:v 3 hero.jpg`
+- **Layout compartido**: `resources/js/Layouts/PublicLayout.vue` (cabecera fija, menú móvil y pie).
+  Los datos del grupo llegan a todas las páginas como prop compartida `group`.
+- **SEO**: metadatos Open Graph y datos estructurados `Organization`/`LocalBusiness` en
+  `resources/views/app.blade.php`, alimentados por `config/group.php`.
+
+---
+
+## Panel de gestión (atajos y navegación)
+
+- **Ctrl + K** (⌘ + K en Mac) abre el buscador de la plataforma: escribe y salta a cualquier
+  pantalla o acción ("nuevo miembro", "cobros", "actas"). Se mueve con ↑ ↓ y se abre con Enter.
+- El botón de la izquierda de la barra superior **pliega la barra lateral** a modo iconos; la
+  preferencia se recuerda en el navegador.
+- El panel de inicio ordena por prioridad: primero **lo que requiere atención** (cada aviso
+  enlaza a la pantalla donde se resuelve), luego accesos directos, agenda, cobros, censo y material.
+  Los avisos en verde se pliegan en una fila de chips para no robar atención.
+
 ---
 
 ## Roles y permisos

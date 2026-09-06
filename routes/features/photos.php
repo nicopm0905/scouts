@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/galeria', [AlbumController::class, 'publicIndex'])->name('albums.public');
 Route::get('/historia', [HistoryPublicController::class, 'show'])->name('history.public');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('albums', AlbumController::class)->except(['create', 'edit']);
 
     Route::post('albums/{album}/photos', [PhotoController::class, 'store'])->name('albums.photos.store');

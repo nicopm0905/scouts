@@ -18,8 +18,17 @@ class FamilyController extends Controller
     {
         Gate::authorize('viewAny', Member::class);
 
-        $families = Family::withCount('members')
-            ->orderBy('name')
+        $user = request()->user();
+
+        $query = Family::withCount('members')->orderBy('name');
+
+        // Un usuario con ámbito de rama (responsable) solo ve las familias
+        // con algún miembro en sus ramas; los roles globales las ven todas.
+        if (! $user->canSeeAllBranches()) {
+            $query->whereHas('members', fn ($q) => $q->visibleTo($user));
+        }
+
+        $families = $query
             ->get()
             ->map(fn (Family $f) => [
                 'id' => $f->id,
@@ -53,7 +62,7 @@ class FamilyController extends Controller
     {
         Gate::authorize('create', Member::class);
 
-        $family->load('members');
+        $family->load('members', 'users');
 
         return Inertia::render('Members/Families/Edit', [
             'family' => [
@@ -67,7 +76,15 @@ class FamilyController extends Controller
                     'full_name' => $m->full_name,
                     'relationship' => $m->pivot->relationship,
                 ]),
+                'accounts' => $family->users->map(fn ($u) => [
+                    'id' => $u->id,
+                    'name' => $u->name,
+                    'email' => $u->email,
+                    'active' => (bool) $u->active,
+                ]),
             ],
+            // Enlace de "crear contraseña" de la última invitación (para copiar/entregar en mano).
+            'inviteUrl' => session('invite_url'),
         ]);
     }
 

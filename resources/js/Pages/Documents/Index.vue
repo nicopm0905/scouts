@@ -2,7 +2,9 @@
 import { ref } from 'vue'
 import { Head, useForm } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
+import DashIcon from '@/Components/Shared/DashIcon.vue'
 import PageHeader from '@/Components/Shared/PageHeader.vue'
+import AppButton from '@/Components/Shared/AppButton.vue'
 import Modal from '@/Components/Shared/Modal.vue'
 import FormField from '@/Components/Shared/FormField.vue'
 import BadgeEstado from '@/Components/Shared/BadgeEstado.vue'
@@ -12,6 +14,7 @@ import { useToast } from '@/composables/useToast'
 const props = defineProps({
     categories: { type: Array, default: () => [] },
     expiring: { type: Array, default: () => [] },
+    members: { type: Array, default: () => [] },
     can: { type: Object, default: () => ({}) },
 })
 
@@ -41,19 +44,35 @@ function submit() {
     else form.post(route('documents.store'), opt)
 }
 function remove(d) { form.delete(route('documents.destroy', d.id), { onSuccess: () => toast.success('Documento eliminado') }) }
+
+const showSignModal = ref(false)
+const signingDocument = ref(null)
+const signForm = useForm({ member_ids: [] })
+function openSignModal(d) { signingDocument.value = d; signForm.reset(); showSignModal.value = true }
+function submitSign() {
+    signForm.post(route('signatures.document.send', signingDocument.value.id), {
+        preserveScroll: true,
+        onSuccess: () => { showSignModal.value = false; toast.success('Solicitud de firma enviada.') },
+    })
+}
 </script>
 
 <template>
     <Head title="Documentos" />
     <AppLayout>
-        <PageHeader title="Documentos" subtitle="Archivo del grupo organizado por categoría.">
+        <PageHeader title="Documentos" subtitle="Archivo del grupo organizado por categoría." icon="folder">
             <template #actions>
-                <button v-if="can.manage" type="button" class="btn-primary btn-sm" @click="openCreate(openCategory)">+ Subir documento</button>
+                <AppButton v-if="can.manage" variant="primary" size="sm" icon="upload" @click="openCreate(openCategory)">
+                    Subir documento
+                </AppButton>
             </template>
         </PageHeader>
 
         <div v-if="expiring.length" class="mb-6 rounded-xl border border-amber-300 bg-amber-50 p-4">
-            <p class="mb-2 text-sm font-semibold text-amber-800">⚠️ Documentos que caducan en los próximos 30 días</p>
+            <p class="mb-2 flex items-center gap-2 text-sm font-semibold text-amber-800">
+                <DashIcon name="warning" class="h-4 w-4" />
+                Documentos que caducan en los próximos 30 días
+            </p>
             <ul class="space-y-1 text-sm text-amber-800">
                 <li v-for="doc in expiring" :key="'exp-' + doc.id">{{ doc.title }} — caduca el {{ doc.expires_at }}</li>
             </ul>
@@ -62,10 +81,16 @@ function remove(d) { form.delete(route('documents.destroy', d.id), { onSuccess: 
         <div class="space-y-3">
             <div v-for="cat in categories" :key="cat.value" class="card overflow-hidden">
                 <button type="button" class="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-ink-50" @click="toggleCategory(cat.value)">
-                    <span class="font-semibold text-ink-800">📁 {{ cat.label }}
+                    <span class="flex items-center gap-2 font-semibold text-slate-800">
+                        <DashIcon name="folder" class="h-4 w-4 text-slate-400" />
+                        {{ cat.label }}
                         <span class="ml-2 rounded-full bg-ink-100 px-2 py-0.5 text-xs font-medium text-ink-500">{{ cat.documents.length }}</span>
                     </span>
-                    <span class="text-ink-400">{{ openCategory === cat.value ? '▲' : '▼' }}</span>
+                    <DashIcon
+                        name="chevron"
+                        class="h-4 w-4 text-slate-400 transition-transform duration-200"
+                        :class="openCategory === cat.value ? '-rotate-90' : 'rotate-90'"
+                    />
                 </button>
 
                 <div v-if="openCategory === cat.value" class="border-t border-ink-100 px-4 py-3">
@@ -81,11 +106,15 @@ function remove(d) { form.delete(route('documents.destroy', d.id), { onSuccess: 
                             </div>
                             <div class="flex flex-wrap items-center gap-2">
                                 <BadgeEstado v-if="doc.is_expired" label="Caducado" color="red" />
+                                <span v-if="doc.signatures?.length" class="text-xs text-ink-500">
+                                    {{ doc.signatures.filter(s => s.status === 'signed').length }} firmadas de {{ doc.signatures.length }} enviadas
+                                </span>
                                 <a v-if="doc.web_view_link || doc.external_url" :href="doc.web_view_link || doc.external_url" target="_blank" class="btn-secondary btn-sm">Ver</a>
                                 <template v-if="can.manage">
+                                    <button type="button" class="btn-secondary btn-sm" @click="openSignModal(doc)">Enviar a firmar</button>
                                     <button type="button" class="btn-secondary btn-sm" @click="openEdit(doc)">Editar</button>
                                     <ConfirmButton message="¿Seguro que quieres eliminar este documento?" confirm-label="Eliminar" @confirm="remove(doc)">
-                                        <span class="rounded-md border border-brand-200 px-2.5 py-1 text-xs font-medium text-brand-600 hover:bg-brand-50">Eliminar</span>
+                                        <span class="inline-flex items-center rounded-lg px-2.5 py-1.5 text-xs font-semibold text-rose-600 transition-colors hover:bg-rose-50">Eliminar</span>
                                     </ConfirmButton>
                                 </template>
                             </div>
@@ -115,6 +144,23 @@ function remove(d) { form.delete(route('documents.destroy', d.id), { onSuccess: 
             <template #footer>
                 <button type="button" class="btn-ghost" @click="showModal = false">Cancelar</button>
                 <button type="button" class="btn-primary" :disabled="form.processing" @click="submit">Guardar</button>
+            </template>
+        </Modal>
+
+        <Modal :show="showSignModal" title="Enviar a firmar" @close="showSignModal = false">
+            <p class="mb-3 text-sm text-ink-600">
+                Selecciona a qué miembros se les envía por email <strong>{{ signingDocument?.title }}</strong> para firma digital.
+            </p>
+            <div class="max-h-64 space-y-1 overflow-y-auto">
+                <label v-for="m in members" :key="m.id" class="flex items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-ink-50">
+                    <input type="checkbox" :value="m.id" v-model="signForm.member_ids" class="rounded border-ink-300 text-brand-600 focus:ring-brand-500" />
+                    {{ m.full_name }}
+                </label>
+            </div>
+            <p v-if="signForm.errors.member_ids" class="mt-2 text-xs text-brand-600">{{ signForm.errors.member_ids }}</p>
+            <template #footer>
+                <button type="button" class="btn-ghost" @click="showSignModal = false">Cancelar</button>
+                <button type="button" class="btn-primary" :disabled="signForm.processing || !signForm.member_ids.length" @click="submitSign">Enviar</button>
             </template>
         </Modal>
     </AppLayout>

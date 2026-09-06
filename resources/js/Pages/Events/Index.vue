@@ -4,8 +4,11 @@ import { Head, Link, router } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import PageHeader from '@/Components/Shared/PageHeader.vue'
 import BadgeEstado from '@/Components/Shared/BadgeEstado.vue'
+import BadgeRama from '@/Components/Shared/BadgeRama.vue'
+import WhatsAppCircularModal from '@/Components/Shared/WhatsAppCircularModal.vue'
 import { useAuth } from '@/composables/useAuth'
 import { useToast } from '@/composables/useToast'
+import { FileDown, MessageCircle, CalendarPlus, Plus, ChevronLeft, ChevronRight, Tent, Calendar, MapPin, ExternalLink, FileSignature } from 'lucide-vue-next'
 
 const props = defineProps({
     events: { type: Array, required: true },
@@ -21,6 +24,18 @@ const toast = useToast()
 const view = ref('month') // 'month' | 'list'
 const branch = ref(props.filters.branch ?? '')
 const showIcal = ref(false)
+const showWhatsAppModal = ref(false)
+
+const filteredIcalUrl = computed(() => {
+    if (!branch.value) return props.icalUrl
+    try {
+        const url = new URL(props.icalUrl)
+        url.searchParams.set('branch', branch.value)
+        return url.toString()
+    } catch (e) {
+        return `${props.icalUrl}?branch=${branch.value}`
+    }
+})
 
 function applyBranch() {
     router.get(route('events.index'), branch.value ? { branch: branch.value } : {}, {
@@ -29,7 +44,7 @@ function applyBranch() {
     })
 }
 function copyIcal() {
-    navigator.clipboard?.writeText(props.icalUrl)
+    navigator.clipboard?.writeText(filteredIcalUrl.value)
     toast.success('Enlace copiado al portapapeles.')
 }
 function regenerate() {
@@ -154,17 +169,33 @@ const formatDate = (iso) =>
 
 // Tipos presentes (para la leyenda)
 const presentTypes = computed(() => [...new Set(props.events.map((e) => e.type))])
+
+// Ocultar reuniones ordinarias en la vista lista para evitar ruido visual,
+// mostrando únicamente salidas, acampadas, campamentos, asambleas, etc.
+const listEvents = computed(() => props.events.filter((e) => e.type !== 'reunion'))
 </script>
 
 <template>
     <Head title="Calendario" />
 
     <AppLayout>
-        <PageHeader title="Calendario de eventos" subtitle="Reuniones, salidas, acampadas y campamentos del grupo.">
+        <PageHeader title="Calendario de eventos" subtitle="Reuniones, salidas, acampadas y campamentos del grupo." icon="calendar">
             <template #actions>
-                <button type="button" class="btn-secondary btn-sm" @click="showIcal = !showIcal">📆 Suscribirme</button>
-                <Link v-if="can('events.manage')" :href="route('events.create')" class="btn-primary btn-sm">
-                    + Nuevo evento
+                <a :href="route('events.pdf.calendar', branch ? { branch } : {})" target="_blank" class="btn-secondary btn-sm group">
+                    <FileDown class="mr-1.5 h-4 w-4 text-slate-500 group-hover:text-slate-700 transition" />
+                    Exportar PDF
+                </a>
+                <button type="button" class="btn-secondary btn-sm group" @click="showWhatsAppModal = true">
+                    <MessageCircle class="h-4 w-4 text-emerald-600 transition group-hover:text-emerald-700" />
+                    Circular WhatsApp
+                </button>
+                <button type="button" class="btn-secondary btn-sm group" @click="showIcal = !showIcal">
+                    <CalendarPlus class="mr-1.5 h-4 w-4 text-slate-500 group-hover:text-slate-700 transition" />
+                    Suscribirme
+                </button>
+                <Link v-if="can('events.manage')" :href="route('events.create')" class="btn-primary btn-sm group">
+                    <Plus class="mr-1 h-4 w-4 text-white/90 group-hover:text-white transition" />
+                    Nuevo evento
                 </Link>
             </template>
         </PageHeader>
@@ -176,7 +207,7 @@ const presentTypes = computed(() => [...new Set(props.events.map((e) => e.type))
                 automáticamente, en modo solo lectura.
             </p>
             <div class="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
-                <input readonly :value="icalUrl" class="input text-xs sm:max-w-md" />
+                <input readonly :value="filteredIcalUrl" class="input text-xs sm:max-w-md" />
                 <div class="flex gap-2">
                     <button type="button" class="btn-secondary btn-sm" @click="copyIcal">Copiar</button>
                     <button type="button" class="btn-secondary btn-sm" @click="regenerate">Regenerar</button>
@@ -207,10 +238,10 @@ const presentTypes = computed(() => [...new Set(props.events.map((e) => e.type))
             <div class="flex items-center justify-between border-b border-ink-100 px-4 py-3">
                 <div class="flex items-center gap-1">
                     <button type="button" class="rounded-lg p-1.5 text-ink-500 hover:bg-ink-100" @click="prevMonth" aria-label="Mes anterior">
-                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+                        <ChevronLeft class="h-5 w-5" />
                     </button>
                     <button type="button" class="rounded-lg p-1.5 text-ink-500 hover:bg-ink-100" @click="nextMonth" aria-label="Mes siguiente">
-                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+                        <ChevronRight class="h-5 w-5" />
                     </button>
                     <h2 class="ml-2 text-base font-bold capitalize text-ink-900">{{ monthLabel }}</h2>
                 </div>
@@ -289,34 +320,67 @@ const presentTypes = computed(() => [...new Set(props.events.map((e) => e.type))
             </span>
         </div>
 
-        <!-- Vista lista -->
-        <div v-else class="space-y-2">
+        <!-- Vista lista (Salidas, Acampadas, Campamentos y Actividades Especiales) -->
+        <div v-else class="space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 rounded-2xl bg-slate-50/80 border border-slate-200/80 px-4 py-2.5 text-xs font-semibold text-slate-600 shadow-sm">
+                <span class="flex items-center gap-1.5 font-bold text-slate-800">
+                    <Tent class="h-4 w-4 text-slate-500" />
+                    <span>Salidas, Acampadas y Campamentos ({{ listEvents.length }})</span>
+                </span>
+                <span class="text-[11px] text-slate-500 font-normal">Las reuniones ordinarias de sábado se consultan en la vista Calendario</span>
+            </div>
+
             <Link
-                v-for="e in events"
+                v-for="e in listEvents"
                 :key="e.id"
                 :href="route('events.show', e.id)"
-                class="flex flex-col gap-1 rounded-xl border border-ink-200 bg-white p-4 transition hover:border-brand-300 hover:shadow-card sm:flex-row sm:items-center sm:justify-between"
+                class="block rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm hover:border-emerald-500 hover:shadow-md transition space-y-3 cursor-pointer group"
             >
-                <div class="flex items-start gap-3">
-                    <span class="mt-0.5 h-9 w-1.5 shrink-0 rounded-full" :style="{ backgroundColor: style(e.type).hex }" />
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <span class="font-semibold text-ink-800">{{ e.title }}</span>
-                            <BadgeEstado :label="e.type_label" :color="style(e.type).badge" />
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-3">
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+                        <span class="hidden sm:block h-10 w-2 shrink-0 rounded-full" :style="{ backgroundColor: style(e.type).hex }" />
+                        <div class="flex-1 min-w-0">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <h3 class="text-base font-black text-slate-900 group-hover:text-emerald-700 transition truncate" :title="e.title">{{ e.title }}</h3>
+                                <span class="rounded-full px-2.5 py-0.5 text-xs font-bold text-white shadow-sm shrink-0" :style="{ backgroundColor: style(e.type).hex }">
+                                    {{ style(e.type).label }}
+                                </span>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs font-medium text-slate-500">
+                                <span class="flex items-center gap-1 whitespace-nowrap"><Calendar class="h-3.5 w-3.5" /> {{ formatDate(e.start_at) }}</span>
+                                <span v-if="e.location" class="flex items-center gap-1 truncate max-w-[200px]" :title="e.location"><MapPin class="h-3.5 w-3.5" /> {{ e.location }}</span>
+                            </div>
                         </div>
-                        <p class="text-sm text-ink-500">
-                            {{ formatDate(e.start_at) }}<span v-if="e.location"> · {{ e.location }}</span>
-                        </p>
+                    </div>
+
+                    <div class="flex shrink-0 items-center gap-2 mt-2 sm:mt-0">
+                        <span class="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-semibold text-white group-hover:bg-emerald-700 transition shadow-sm w-full sm:w-auto justify-center">
+                            <ExternalLink class="h-3.5 w-3.5" /> Abrir Ficha del Evento
+                        </span>
                     </div>
                 </div>
-                <div class="flex flex-wrap gap-1">
-                    <BadgeEstado v-for="b in e.branches" :key="b" :label="b" color="gray" />
+
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <span class="font-bold text-slate-500 mr-1">Ramas Afectadas:</span>
+                        <BadgeRama v-for="b in e.branches" :key="b" :rama="b" />
+                    </div>
+
+                    <div v-if="e.requires_enrollment" class="flex items-center gap-1.5 text-slate-500 font-medium">
+                        <FileSignature class="h-4 w-4" /> Requiere inscripción oficial
+                    </div>
                 </div>
             </Link>
 
-            <p v-if="events.length === 0" class="rounded-xl border border-dashed border-ink-300 bg-white p-8 text-center text-ink-400">
-                No hay eventos que coincidan con el filtro.
+            <p v-if="listEvents.length === 0" class="rounded-2xl border border-dashed border-slate-300 bg-white p-12 text-center text-sm font-semibold text-slate-400">
+                No hay salidas, acampadas ni campamentos registrados con el filtro actual.
             </p>
         </div>
+
+        <WhatsAppCircularModal
+            :show="showWhatsAppModal"
+            :default-branch="branch || 'castor'"
+            @close="showWhatsAppModal = false"
+        />
     </AppLayout>
 </template>

@@ -7,6 +7,7 @@ use App\Enums\ChargeType;
 use App\Enums\MemberRole;
 use App\Enums\PaymentMethod;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Finance\BulkMarkChargeMembersPaidRequest;
 use App\Http\Requests\Finance\StoreChargeRequest;
 use App\Jobs\SendPaymentReminderJob;
 use App\Models\Charge;
@@ -14,6 +15,7 @@ use App\Models\ChargeMember;
 use App\Models\Member;
 use App\Services\Finance\ChargeAssignmentService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -22,9 +24,7 @@ class ChargeController extends Controller
 {
     use AuthorizesRequests;
 
-    public function __construct(private ChargeAssignmentService $service)
-    {
-    }
+    public function __construct(private ChargeAssignmentService $service) {}
 
     public function index(Request $request): Response
     {
@@ -63,7 +63,7 @@ class ChargeController extends Controller
         ]);
     }
 
-    public function store(StoreChargeRequest $request): \Illuminate\Http\RedirectResponse
+    public function store(StoreChargeRequest $request): RedirectResponse
     {
         $charge = $this->service->create($request->validated(), $request->user());
 
@@ -79,6 +79,7 @@ class ChargeController extends Controller
         return Inertia::render('Charges/Show', [
             'charge' => [
                 'id' => $charge->id,
+                'event_id' => $charge->event_id,
                 'title' => $charge->title,
                 'description' => $charge->description,
                 'amount' => (float) $charge->amount,
@@ -113,7 +114,7 @@ class ChargeController extends Controller
     }
 
     /** Envía recordatorio de pago a los miembros con el cobro pendiente (aún no avisados). */
-    public function remind(Request $request, Charge $charge): \Illuminate\Http\RedirectResponse
+    public function remind(Request $request, Charge $charge): RedirectResponse
     {
         $this->authorize('update', $charge);
 
@@ -129,6 +130,30 @@ class ChargeController extends Controller
         $message = $pending->isEmpty()
             ? 'No hay pendientes sin avisar.'
             : "Recordatorio programado para {$pending->count()} miembro(s).";
+
+        return back()->with('success', $message);
+    }
+
+    /**
+     * Marca varias filas de reparto como pagadas de una vez. Uso típico: tras una
+     * salida, cobrar en efectivo en mano a la mayoría y cerrarlo en un solo paso.
+     */
+    public function bulkMarkPaid(BulkMarkChargeMembersPaidRequest $request, Charge $charge): RedirectResponse
+    {
+        $method = PaymentMethod::from($request->validated('payment_method'));
+
+        $rows = $charge->assignments()
+            ->whereIn('id', $request->validated('assignment_ids'))
+            ->where('status', '!=', ChargeStatus::Paid->value)
+            ->get();
+
+        foreach ($rows as $row) {
+            $row->markPaid($method);
+        }
+
+        $message = $rows->isEmpty()
+            ? 'No había filas pendientes que marcar.'
+            : "{$rows->count()} pago(s) registrados ({$method->label()}).";
 
         return back()->with('success', $message);
     }
@@ -150,7 +175,7 @@ class ChargeController extends Controller
         ];
     }
 
-    public function destroy(Charge $charge): \Illuminate\Http\RedirectResponse
+    public function destroy(Charge $charge): RedirectResponse
     {
         $this->authorize('delete', $charge);
 

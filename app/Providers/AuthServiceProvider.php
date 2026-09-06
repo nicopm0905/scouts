@@ -14,6 +14,7 @@ use App\Models\InventoryItem;
 use App\Models\Invoice;
 use App\Models\Member;
 use App\Models\Minute;
+use App\Models\User;
 use App\Policies\ActivityPolicy;
 use App\Policies\AlbumPolicy;
 use App\Policies\BranchPlanPolicy;
@@ -25,7 +26,7 @@ use App\Policies\InventoryItemPolicy;
 use App\Policies\InvoicePolicy;
 use App\Policies\MemberPolicy;
 use App\Policies\MinutePolicy;
-use App\Models\User;
+use App\Policies\UserPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 
@@ -43,6 +44,7 @@ class AuthServiceProvider extends ServiceProvider
         InventoryItem::class => InventoryItemPolicy::class,
         Album::class => AlbumPolicy::class,
         HistoryEntry::class => HistoryEntryPolicy::class,
+        User::class => UserPolicy::class,
     ];
 
     public function boot(): void

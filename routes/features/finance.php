@@ -1,22 +1,27 @@
 <?php
 
+use App\Http\Controllers\Finance\BudgetController;
 use App\Http\Controllers\Finance\ChargeController;
 use App\Http\Controllers\Finance\ChargeMemberController;
 use App\Http\Controllers\Finance\FinanceReportController;
 use App\Http\Controllers\Finance\InvoiceController;
 use App\Http\Controllers\Finance\SettingsController;
+use App\Http\Controllers\Finance\TreasuryDashboardController;
 use Illuminate\Support\Facades\Route;
 
 /*
 | Rutas del feature de Tesorería (Agente B): cobros, facturas, informe
 | económico, recordatorios y ajustes. Todas autenticadas.
 */
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
+    // Dashboard de Tesorería
+    Route::get('/tesoreria', [TreasuryDashboardController::class, 'index'])->name('finance.dashboard');
     // Cobros
     Route::get('/cobros', [ChargeController::class, 'index'])->name('charges.index');
     Route::post('/cobros', [ChargeController::class, 'store'])->name('charges.store');
     Route::get('/cobros/{charge}', [ChargeController::class, 'show'])->name('charges.show');
     Route::post('/cobros/{charge}/recordar', [ChargeController::class, 'remind'])->name('charges.remind');
+    Route::post('/cobros/{charge}/marcar-pagados', [ChargeController::class, 'bulkMarkPaid'])->name('charges.members.bulk-mark-paid');
     Route::delete('/cobros/{charge}', [ChargeController::class, 'destroy'])->name('charges.destroy');
 
     Route::post('/cobros/reparto/{chargeMember}/marcar-pagado', [ChargeMemberController::class, 'markPaid'])
@@ -35,6 +40,14 @@ Route::middleware('auth')->group(function () {
     // Informe económico
     Route::get('/informe-economico', [FinanceReportController::class, 'index'])->name('finance.report');
     Route::get('/informe-economico/exportar', [FinanceReportController::class, 'export'])->name('finance.report.export');
+
+    // Presupuestos
+    Route::post('/presupuestos', [BudgetController::class, 'store'])->name('budgets.store');
+    Route::get('/presupuestos/{budget}', [BudgetController::class, 'show'])->name('budgets.show');
+    Route::put('/presupuestos/{budget}', [BudgetController::class, 'update'])->name('budgets.update');
+    Route::post('/presupuestos/{budget}/items', [BudgetController::class, 'storeItem'])->name('budgets.items.store');
+    Route::put('/presupuestos/items/{budgetItem}', [BudgetController::class, 'updateItem'])->name('budgets.items.update');
+    Route::delete('/presupuestos/items/{budgetItem}', [BudgetController::class, 'destroyItem'])->name('budgets.items.destroy');
 
     // Ajustes
     Route::get('/ajustes', [SettingsController::class, 'edit'])->name('settings.edit');

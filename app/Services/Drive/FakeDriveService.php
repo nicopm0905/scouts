@@ -55,12 +55,23 @@ class FakeDriveService implements DriveServiceInterface
         return $file;
     }
 
-    public function createFolder(string $name, ?string $parentId = null): string
+    public function createFolder(string $name, ?string $parentId = null, ?string $colorRgb = null): string
     {
         $id = 'folder-'.Str::random(20);
-        self::$folders[$id] = ['name' => $name, 'parent' => $parentId];
+        self::$folders[$id] = ['name' => $name, 'parent' => $parentId, 'color' => $colorRgb];
 
         return $id;
+    }
+
+    public function searchFolder(string $name, ?string $parentId = null): ?string
+    {
+        foreach (self::$folders as $id => $data) {
+            if ($data['name'] === $name && $data['parent'] === $parentId) {
+                return $id;
+            }
+        }
+
+        return null;
     }
 
     public function download(string $fileId): string

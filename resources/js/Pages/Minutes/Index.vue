@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { Head, useForm } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import PageHeader from '@/Components/Shared/PageHeader.vue'
+import AppButton from '@/Components/Shared/AppButton.vue'
 import Modal from '@/Components/Shared/Modal.vue'
 import FormField from '@/Components/Shared/FormField.vue'
 import DataTable from '@/Components/Shared/DataTable.vue'
@@ -107,9 +108,9 @@ function remove(minute) {
 <template>
     <Head title="Actas" />
     <AppLayout>
-        <PageHeader title="Actas" subtitle="Actas de consejo y asamblea, con generación automática de PDF.">
+        <PageHeader title="Actas" subtitle="Actas de consejo y asamblea, con generación automática de PDF." icon="document">
             <template #actions>
-                <button v-if="can.manage" type="button" class="btn-primary btn-sm" @click="openCreate">+ Nueva acta</button>
+                <AppButton v-if="can.manage" variant="primary" size="sm" icon="plus" @click="openCreate">Nueva acta</AppButton>
             </template>
         </PageHeader>
 

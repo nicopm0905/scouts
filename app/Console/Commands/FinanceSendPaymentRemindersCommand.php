@@ -37,7 +37,7 @@ class FinanceSendPaymentRemindersCommand extends Command
         $limit = $today->copy()->addDays($daysBefore);
 
         $pending = ChargeMember::query()
-            ->with('charge')
+            ->with(['charge', 'member.families'])
             ->where('status', ChargeStatus::Pending->value)
             ->whereNull('reminder_sent_at')
             ->whereHas('charge', function ($query) use ($limit) {
@@ -45,11 +45,26 @@ class FinanceSendPaymentRemindersCommand extends Command
             })
             ->get();
 
-        foreach ($pending as $chargeMember) {
+        // Separamos los cobros sin ningún email de contacto (ni familia ni miembro):
+        // no tiene sentido encolarlos y el tesorero debe saber que hay que avisarles a mano.
+        [$notifiable, $withoutEmail] = $pending->partition(
+            fn (ChargeMember $cm) => $cm->member?->contactEmail() !== null
+        );
+
+        foreach ($notifiable as $chargeMember) {
             SendPaymentReminderJob::dispatch($chargeMember->id);
         }
 
-        $this->info("Recordatorios encolados: {$pending->count()}.");
+        $this->info("Recordatorios encolados: {$notifiable->count()}.");
+
+        if ($withoutEmail->isNotEmpty()) {
+            $this->warn("Sin email de contacto (avisar por otro medio): {$withoutEmail->count()}.");
+            foreach ($withoutEmail as $chargeMember) {
+                $memberName = $chargeMember->member?->full_name ?? "Miembro #{$chargeMember->member_id}";
+                $chargeTitle = $chargeMember->charge?->title ?? "Cobro #{$chargeMember->charge_id}";
+                $this->line("  - {$memberName} · {$chargeTitle}");
+            }
+        }
 
         return self::SUCCESS;
     }

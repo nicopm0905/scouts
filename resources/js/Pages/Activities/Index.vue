@@ -45,7 +45,7 @@ function duplicate(activity) {
 <template>
     <Head title="Actividades" />
 
-    <PageHeader title="Biblioteca de actividades" subtitle="Actividades reutilizables por rama, con materiales y adjuntos.">
+    <PageHeader title="Biblioteca de actividades" subtitle="Actividades reutilizables por rama, con materiales y adjuntos." icon="sparkles">
         <template #actions>
             <Link
                 v-if="canManage"

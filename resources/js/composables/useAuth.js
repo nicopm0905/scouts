@@ -14,6 +14,8 @@ export function useAuth() {
     const permissions = computed(() => user.value?.permissions ?? [])
 
     const isAdmin = computed(() => roles.value.includes('admin'))
+    const isFamilia = computed(() => roles.value.includes('familia'))
+    const isIntendente = computed(() => roles.value.includes('intendencia'))
 
     function can(permission) {
         return isAdmin.value || permissions.value.includes(permission)
@@ -23,5 +25,5 @@ export function useAuth() {
         return roles.value.includes(role)
     }
 
-    return { user, roles, permissions, isAdmin, can, hasRole }
+    return { user, roles, permissions, isAdmin, isFamilia, isIntendente, can, hasRole }
 }

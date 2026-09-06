@@ -45,7 +45,7 @@ function onPhotoChange(e) {
 <template>
     <Head :title="isEdit ? 'Editar ítem' : 'Nuevo ítem'" />
     <AppLayout>
-        <PageHeader :title="isEdit ? 'Editar ítem' : 'Nuevo ítem'" subtitle="Datos del material de inventario." />
+        <PageHeader :title="isEdit ? 'Editar ítem' : 'Nuevo ítem'" subtitle="Datos del material de inventario." icon="box" />
 
         <form class="max-w-2xl space-y-4 card-pad" @submit.prevent="submit">
             <FormField label="Nombre" v-model="form.name" required :error="form.errors.name" />

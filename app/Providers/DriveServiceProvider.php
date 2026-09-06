@@ -20,7 +20,7 @@ class DriveServiceProvider extends ServiceProvider
                     $this->loadCredentials($config['service_account_json'] ?? null),
                     $config['root_folder_id'] ?? null,
                 ),
-                default => new FakeDriveService(),
+                default => new FakeDriveService,
             };
         });
     }
@@ -36,7 +36,15 @@ class DriveServiceProvider extends ServiceProvider
             throw new RuntimeException('GOOGLE_DRIVE_SERVICE_ACCOUNT_JSON no está configurado.');
         }
 
-        $json = is_file($source) ? file_get_contents($source) : $source;
+        $actualPath = base_path($source);
+        if (is_file($actualPath)) {
+            $json = file_get_contents($actualPath);
+        } elseif (is_file($source)) {
+            $json = file_get_contents($source);
+        } else {
+            $json = $source;
+        }
+
         $decoded = json_decode($json, true);
 
         if (! is_array($decoded)) {

@@ -22,6 +22,8 @@ class EventChecklistController extends Controller
 
         $event->checklistItems()->create([
             'label' => $request->validated('label'),
+            'assigned_to' => $request->validated('assigned_to'),
+            'due_at' => $request->validated('due_at'),
             'position' => $position,
         ]);
 

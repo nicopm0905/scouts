@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import PageHeader from '@/Components/Shared/PageHeader.vue'
+import AppButton from '@/Components/Shared/AppButton.vue'
 import Modal from '@/Components/Shared/Modal.vue'
 import FormField from '@/Components/Shared/FormField.vue'
 import ConfirmButton from '@/Components/Shared/ConfirmButton.vue'
@@ -58,10 +59,12 @@ function destroyAlbum(album) {
 <template>
     <Head title="Álbumes de fotos" />
     <AppLayout>
-        <PageHeader title="Álbumes de fotos" subtitle="Fotos de eventos y salidas alojadas en Google Drive.">
+        <PageHeader title="Álbumes de fotos" subtitle="Fotos de eventos y salidas alojadas en Google Drive." icon="photo">
             <template #actions>
-                <Link :href="route('albums.public')" class="btn-secondary btn-sm">Galería pública</Link>
-                <button v-if="can('photos.manage')" type="button" class="btn-primary btn-sm" @click="showCreate = true">+ Nuevo álbum</button>
+                <AppButton :href="route('albums.public')" external size="sm" icon="external">Galería pública</AppButton>
+                <AppButton v-if="can('photos.manage')" variant="primary" size="sm" icon="plus" @click="showCreate = true">
+                    Nuevo álbum
+                </AppButton>
             </template>
         </PageHeader>
 

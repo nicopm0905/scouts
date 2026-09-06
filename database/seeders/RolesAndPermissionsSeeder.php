@@ -28,7 +28,9 @@ class RolesAndPermissionsSeeder extends Seeder
         'inventory.view', 'inventory.manage', 'inventory.reserve',
         'photos.view', 'photos.manage',
         'history.manage',
-        'settings.manage',
+        'settings.finance', // ajustes de tesorería (datos fiscales, descuentos, recordatorios)
+        'portal.access',    // puerta única del portal de familias
+        'users.manage',     // gestión de cuentas de acceso (solo coordinación)
     ];
 
     /** Permisos asignados a cada rol (admin recibe todos vía Gate::before). */
@@ -47,6 +49,12 @@ class RolesAndPermissionsSeeder extends Seeder
             'invoices.view', 'invoices.manage',
             'finance.reports',
             'events.view',
+            'inventory.view',
+            'settings.finance',
+        ],
+        'intendencia' => [
+            'inventory.view', 'inventory.manage', 'inventory.reserve',
+            'events.view',
         ],
         'responsable' => [
             'members.view', 'attendance.manage',
@@ -56,8 +64,11 @@ class RolesAndPermissionsSeeder extends Seeder
             'inventory.view', 'inventory.reserve',
             'photos.view', 'photos.manage',
         ],
+        // La familia solo tiene la puerta del portal. Todo lo que ve dentro se
+        // acota por parentesco en los controladores de App\Http\Controllers\Portal,
+        // no con permisos de módulo (que abrirían las pantallas de gestión).
         'familia' => [
-            'charges.view', 'events.view',
+            'portal.access',
         ],
     ];
 

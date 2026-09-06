@@ -33,7 +33,7 @@ function submit() {
 <template>
     <Head title="Nuevo miembro" />
     <AppLayout>
-        <PageHeader title="Nuevo miembro" subtitle="Da de alta a un scout o responsable." />
+        <PageHeader title="Nuevo miembro" subtitle="Da de alta a un scout o responsable." icon="userPlus" />
 
         <form class="max-w-2xl space-y-4 rounded-lg border border-slate-200 bg-white p-6" @submit.prevent="submit">
             <MemberForm :form="form" :branches="branches" />

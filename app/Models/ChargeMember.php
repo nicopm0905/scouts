@@ -7,11 +7,14 @@ use App\Enums\PaymentMethod;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 /** Fila de reparto de un cobro a un miembro (tabla pivote charge_member con estado propio). */
 class ChargeMember extends Model
 {
     use HasFactory;
+    use LogsActivity;
 
     protected $table = 'charge_member';
 
@@ -27,6 +30,16 @@ class ChargeMember extends Model
         'paid_at' => 'datetime',
         'reminder_sent_at' => 'datetime',
     ];
+
+    /** Trazabilidad: cambios de estado de pago (incluye markPaid). */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('charge_member')
+            ->logFillable()
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs();
+    }
 
     public function charge(): BelongsTo
     {

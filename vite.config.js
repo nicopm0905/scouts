@@ -26,5 +26,19 @@ export default defineConfig({
         hmr: {
             host: 'localhost',
         },
+        /*
+        | CORS: Vite 6 solo acepta peticiones del mismo origen, y laravel-vite-plugin
+        | reduce la lista permitida a `server.origin` cuando este se define. Sin esto,
+        | la app (http://localhost:8000) no puede cargar los assets del dev server
+        | (http://localhost:5173) y la página se queda EN BLANCO.
+        | Permitimos cualquier puerto de localhost/127.0.0.1, igual que el defecto de Vite.
+        */
+        cors: {
+            origin: [
+                /^https?:\/\/localhost(:\d+)?$/,
+                /^https?:\/\/127\.0\.0\.1(:\d+)?$/,
+                /^https?:\/\/\[::1\](:\d+)?$/,
+            ],
+        },
     },
 });

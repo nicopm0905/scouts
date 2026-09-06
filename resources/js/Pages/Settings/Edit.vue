@@ -33,7 +33,7 @@ function submit() {
 <template>
     <Head title="Ajustes" />
     <AppLayout>
-        <PageHeader title="Ajustes" subtitle="Datos fiscales del grupo, descuento por hermanos y recordatorios de pago." />
+        <PageHeader title="Ajustes" subtitle="Datos fiscales del grupo, descuento por hermanos y recordatorios de pago." icon="cog" />
 
         <form class="max-w-2xl space-y-6" @submit.prevent="submit">
             <section class="card-pad">

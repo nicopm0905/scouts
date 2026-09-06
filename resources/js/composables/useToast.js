@@ -8,6 +8,11 @@ const state = reactive({
 let counter = 0
 
 function push(message, type = 'success', options = {}) {
+    // Evitar toasts duplicados (ej: flash del backend + onSuccess de Inertia)
+    if (state.toasts.some(t => t.message === message && t.type === type)) {
+        return null;
+    }
+
     const id = ++counter
     state.toasts.push({
         id,

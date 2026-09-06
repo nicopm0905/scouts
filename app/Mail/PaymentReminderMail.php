@@ -14,9 +14,7 @@ class PaymentReminderMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public function __construct(public ChargeMember $chargeMember)
-    {
-    }
+    public function __construct(public ChargeMember $chargeMember) {}
 
     public function envelope(): Envelope
     {
@@ -33,13 +31,13 @@ class PaymentReminderMail extends Mailable
         $amount = number_format((float) $this->chargeMember->amount, 2, ',', '.');
 
         $html = <<<HTML
-            <p>Hola,</p>
-            <p>Te recordamos que el cobro <strong>{$charge->title}</strong>
+            <p>Hola:</p>
+            <p>Os recordamos que el cobro <strong>{$charge->title}</strong>
             correspondiente a <strong>{$member->full_name}</strong> por importe de
             <strong>{$amount} €</strong> está pendiente de pago
             (fecha límite: {$dueDate}).</p>
-            <p>Si ya lo has abonado, ignora este mensaje.</p>
-            <p>Gracias.</p>
+            <p>Si ya lo habéis abonado, podéis ignorar este mensaje.</p>
+            <p>Gracias,<br>El equipo del grupo scout.</p>
         HTML;
 
         return new Content(htmlString: $html);

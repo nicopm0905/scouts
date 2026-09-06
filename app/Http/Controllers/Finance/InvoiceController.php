@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Finance;
 
 use App\Enums\InvoiceCategory;
 use App\Enums\InvoiceDirection;
+use App\Enums\MemberRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Finance\StoreInvoiceRequest;
 use App\Http\Requests\Finance\StoreInvoiceUploadRequest;
@@ -24,17 +25,18 @@ class InvoiceController extends Controller
     public function __construct(
         private DriveServiceInterface $drive,
         private InvoicePdfService $pdfService,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request): Response
     {
         $this->authorize('viewAny', Invoice::class);
 
         $direction = $request->string('direction')->toString() ?: null;
+        $branch = $request->string('branch')->toString() ?: null;
 
         $invoices = Invoice::query()
             ->when($direction, fn ($q) => $q->where('direction', $direction))
+            ->when($branch, fn ($q) => $q->where('branch', $branch))
             ->latest('date')
             ->get()
             ->map(fn (Invoice $invoice) => $this->toArray($invoice));
@@ -42,8 +44,10 @@ class InvoiceController extends Controller
         return Inertia::render('Invoices/Index', [
             'invoices' => $invoices,
             'direction' => $direction,
+            'branch' => $branch,
             'categories' => array_map(fn (InvoiceCategory $c) => ['value' => $c->value, 'label' => $c->label()], InvoiceCategory::cases()),
             'directions' => array_map(fn (InvoiceDirection $d) => ['value' => $d->value, 'label' => $d->label()], InvoiceDirection::cases()),
+            'branches' => array_map(fn (MemberRole $r) => ['value' => $r->value, 'label' => $r->label()], MemberRole::branches()),
         ]);
     }
 
@@ -137,6 +141,8 @@ class InvoiceController extends Controller
             'total' => (float) $invoice->amount + (float) $invoice->vat,
             'category' => $invoice->category->value,
             'category_label' => $invoice->category->label(),
+            'branch' => $invoice->branch?->value,
+            'branch_label' => $invoice->branch?->label(),
             'drive_file_id' => $invoice->drive_file_id,
             'view_url' => $invoice->drive_file_id ? $this->drive->webViewLink($invoice->drive_file_id) : null,
         ];

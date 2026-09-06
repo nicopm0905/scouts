@@ -20,4 +20,10 @@ class Family extends Model
             ->withPivot('relationship')
             ->withTimestamps();
     }
+
+    /** Cuentas de acceso (rol "familia") vinculadas a este núcleo familiar. */
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class)->withTimestamps();
+    }
 }

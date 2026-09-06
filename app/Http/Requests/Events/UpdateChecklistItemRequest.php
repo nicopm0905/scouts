@@ -17,6 +17,8 @@ class UpdateChecklistItemRequest extends FormRequest
             'done' => ['sometimes', 'boolean'],
             'label' => ['sometimes', 'string', 'max:255'],
             'notes' => ['nullable', 'string'],
+            'assigned_to' => ['sometimes', 'nullable', 'integer', 'exists:users,id'],
+            'due_at' => ['sometimes', 'nullable', 'date'],
         ];
     }
 }

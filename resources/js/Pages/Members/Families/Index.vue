@@ -21,7 +21,7 @@ const columns = [
 <template>
     <Head title="Familias" />
     <AppLayout>
-        <PageHeader title="Familias" subtitle="Grupos familiares y sus vínculos con los miembros.">
+        <PageHeader title="Familias" subtitle="Grupos familiares y sus vínculos con los miembros." icon="heart">
             <template #actions>
                 <Link :href="route('members.index')" class="text-sm text-slate-500 hover:underline">Volver a miembros</Link>
                 <Link

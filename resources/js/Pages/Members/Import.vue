@@ -22,7 +22,7 @@ function submit() {
 <template>
     <Head title="Importar miembros" />
     <AppLayout>
-        <PageHeader title="Importar miembros" subtitle="Sube un fichero CSV con los miembros a dar de alta." />
+        <PageHeader title="Importar miembros" subtitle="Sube un fichero Excel (.xlsx) o CSV con los miembros a dar de alta." icon="upload" />
 
         <div class="max-w-xl space-y-4 rounded-lg border border-slate-200 bg-white p-6">
             <p class="text-sm text-slate-600">
@@ -30,6 +30,12 @@ function submit() {
                 <code class="rounded bg-slate-100 px-1 py-0.5 text-xs">
                     first_name,last_name,phone,email,role,birth_date,joined_at,active,notes
                 </code>
+                y, opcionalmente, columnas de familia:
+                <code class="rounded bg-slate-100 px-1 py-0.5 text-xs">family_name,family_phone,family_email</code>
+                (crea o reutiliza la familia y la vincula).
+            </p>
+            <p class="text-sm text-slate-600">
+                Si un miembro ya existe (mismo nombre, apellidos y fecha de nacimiento) se actualiza en vez de duplicarse.
             </p>
 
             <a
@@ -41,10 +47,10 @@ function submit() {
 
             <form class="space-y-3" @submit.prevent="submit">
                 <div>
-                    <label class="block text-sm font-medium text-slate-700">Fichero CSV</label>
+                    <label class="block text-sm font-medium text-slate-700">Fichero (CSV o Excel)</label>
                     <input
                         type="file"
-                        accept=".csv,text/csv"
+                        accept=".csv,text/csv,.xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
                         class="mt-1 block w-full text-sm"
                         @change="form.file = $event.target.files[0]"
                     />

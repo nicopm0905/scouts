@@ -29,7 +29,7 @@ class SettingsController extends Controller
 
     public function edit(): Response
     {
-        $this->authorize('settings.manage');
+        $this->authorize('settings.finance');
 
         $values = [];
         foreach (self::KEYS as $field => $settingKey) {

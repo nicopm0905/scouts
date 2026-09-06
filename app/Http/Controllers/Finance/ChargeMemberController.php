@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers\Finance;
 
+use App\Enums\PaymentMethod;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Finance\MarkChargeMemberPaidRequest;
+use App\Models\Charge;
 use App\Models\ChargeMember;
 use App\Models\Member;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -20,17 +23,25 @@ class ChargeMemberController extends Controller
         $chargeMember->update([
             'notes' => $request->input('notes', $chargeMember->notes),
         ]);
-        $chargeMember->markPaid(\App\Enums\PaymentMethod::from($request->validated('payment_method')));
+        $chargeMember->markPaid(PaymentMethod::from($request->validated('payment_method')));
 
         return back()->with('success', 'Pago registrado.');
     }
 
     /** Historial de cobros de un miembro concreto (para la vista de control). */
-    public function history(Member $member): Response
+    public function history(Request $request, Member $member): Response
     {
-        $this->authorize('view', \App\Models\Charge::class);
+        $this->authorize('viewAny', Charge::class);
 
-        $assignments = \App\Models\ChargeMember::query()
+        // El miembro debe ser visible para el usuario (roles globales ven todo;
+        // el resto solo miembros de sus ramas).
+        $user = $request->user();
+        abort_unless(
+            $user->canSeeAllBranches() || Member::visibleTo($user)->whereKey($member->id)->exists(),
+            403
+        );
+
+        $assignments = ChargeMember::query()
             ->with('charge')
             ->where('member_id', $member->id)
             ->get()

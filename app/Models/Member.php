@@ -11,10 +11,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Member extends Model
 {
     use HasFactory;
+    use LogsActivity;
     use SoftDeletes;
 
     protected $fillable = [
@@ -28,6 +31,16 @@ class Member extends Model
         'joined_at' => 'date',
         'active' => 'boolean',
     ];
+
+    /** Trazabilidad RGPD: cambios en datos personales de miembros. */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('member')
+            ->logFillable()
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs();
+    }
 
     // --- Relaciones ---
 
@@ -94,6 +107,18 @@ class Member extends Model
         return $this->role === MemberRole::Responsable;
     }
 
+    /**
+     * Email de contacto para comunicaciones (recordatorios de pago, avisos).
+     * Prioriza el email de contacto de la familia (los niños no suelen tener email
+     * propio) y cae al email del propio miembro si no hay familia con email.
+     */
+    public function contactEmail(): ?string
+    {
+        $familyEmail = $this->families->first(fn (Family $f) => filled($f->contact_email))?->contact_email;
+
+        return $familyEmail ?: ($this->email ?: null);
+    }
+
     // --- Scopes ---
 
     public function scopeActive(Builder $query): Builder
@@ -108,12 +133,17 @@ class Member extends Model
 
     /**
      * Limita la consulta a lo que un usuario puede ver.
-     * admin/secretaria/tesoreria ven todo; responsable solo sus ramas.
+     * admin/secretaria/tesoreria/intendencia ven todo; responsable solo sus ramas;
+     * familia solo los scouts a su cargo.
      */
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
         if ($user->canSeeAllBranches()) {
             return $query;
+        }
+
+        if ($user->isFamilia()) {
+            return $query->whereKey($user->childIds() ?: [0]);
         }
 
         $branches = $user->branches ?? [];

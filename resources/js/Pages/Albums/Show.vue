@@ -43,7 +43,7 @@ function destroyPhoto(photo) {
 <template>
     <Head :title="album.title" />
     <AppLayout>
-        <PageHeader :title="album.title" :subtitle="album.description">
+        <PageHeader :title="album.title" :subtitle="album.description" icon="photo">
             <template #actions>
                 <Link :href="route('albums.index')" class="text-sm text-ink-500 hover:underline">
                     &larr; Volver a álbumes
@@ -85,7 +85,7 @@ function destroyPhoto(photo) {
 
         <div v-if="photos.length" class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             <div v-for="photo in photos" :key="photo.id" class="group relative overflow-hidden rounded-lg border border-ink-200 bg-white">
-                <img :src="photo.thumbnail_url" :alt="photo.caption ?? album.title" class="h-40 w-full object-cover" loading="lazy" />
+                <img :src="photo.thumbnail_url" :alt="photo.caption ?? album.title" class="h-40 w-full object-cover object-top" loading="lazy" />
                 <p v-if="photo.caption" class="p-2 text-xs text-ink-500">{{ photo.caption }}</p>
                 <ConfirmButton
                     v-if="can('photos.manage')"

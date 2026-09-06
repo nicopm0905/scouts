@@ -4,6 +4,11 @@ import { Head, Link, router, useForm } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import PageHeader from '@/Components/Shared/PageHeader.vue'
 import DataTable from '@/Components/Shared/DataTable.vue'
+import StatCard from '@/Components/Shared/StatCard.vue'
+import AppButton from '@/Components/Shared/AppButton.vue'
+import FilterSelect from '@/Components/Shared/FilterSelect.vue'
+import SectionCard from '@/Components/Shared/SectionCard.vue'
+import DashIcon from '@/Components/Shared/DashIcon.vue'
 import BadgeEstado from '@/Components/Shared/BadgeEstado.vue'
 import Modal from '@/Components/Shared/Modal.vue'
 import ConfirmButton from '@/Components/Shared/ConfirmButton.vue'
@@ -82,46 +87,38 @@ const inp = 'mt-1 block w-full rounded-lg border-ink-300 text-sm focus:border-br
 <template>
     <Head title="Inventario" />
     <AppLayout>
-        <PageHeader title="Inventario" subtitle="Material del grupo: tiendas, cocina, botiquín y más.">
+        <PageHeader title="Inventario" subtitle="Material del grupo: tiendas, cocina, botiquín y más." icon="box">
             <template #actions>
-                <Link v-if="can.manage" :href="route('inventory.create')" class="btn-primary btn-sm">+ Nuevo ítem</Link>
+                <AppButton v-if="can.manage" :href="route('inventory.create')" variant="primary" size="sm" icon="plus">
+                    Nuevo ítem
+                </AppButton>
             </template>
         </PageHeader>
 
-        <!-- KPIs -->
-        <div class="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
-            <div class="card p-4">
-                <p class="section-title">Ítems</p>
-                <p class="mt-1 text-2xl font-bold text-ink-800">{{ stats.items }}</p>
-                <p class="text-xs text-ink-400">{{ stats.units }} unidades</p>
-            </div>
-            <div class="card p-4">
-                <p class="section-title">Prestadas</p>
-                <p class="mt-1 text-2xl font-bold" :class="stats.out > 0 ? 'text-blue-600' : 'text-ink-800'">{{ stats.out }}</p>
-                <p class="text-xs text-ink-400">unidades fuera</p>
-            </div>
-            <div class="card p-4">
-                <p class="section-title">A revisar</p>
-                <p class="mt-1 text-2xl font-bold" :class="stats.review > 0 ? 'text-amber-600' : 'text-ink-800'">{{ stats.review }}</p>
-                <p class="text-xs text-ink-400">próximas revisiones</p>
-            </div>
-            <div class="card p-4">
-                <p class="section-title">Fuera de plazo</p>
-                <p class="mt-1 text-2xl font-bold" :class="stats.overdue > 0 ? 'text-brand-600' : 'text-ink-800'">{{ stats.overdue }}</p>
-                <p class="text-xs text-ink-400">sin devolver</p>
-            </div>
+        <!-- Cifras del material -->
+        <div class="mb-5 grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <StatCard label="Ítems" :value="stats.total" hint="referencias" icon="box" />
+            <StatCard label="Prestados" :value="stats.out" hint="unidades fuera" :tone="stats.out > 0 ? 'brand' : 'neutral'" icon="upload" />
+            <StatCard label="A revisar" :value="stats.review" hint="próximas revisiones" :tone="stats.review > 0 ? 'warning' : 'neutral'" icon="clock" />
+            <StatCard label="Fuera de plazo" :value="stats.overdue" hint="sin devolver" :tone="stats.overdue > 0 ? 'danger' : 'neutral'" icon="warning" />
         </div>
 
         <!-- Alertas -->
         <div v-if="hasAlerts" class="mb-6 grid gap-4 sm:grid-cols-2">
             <div v-if="needingReview.length" class="rounded-xl border border-amber-200 bg-amber-50 p-4">
-                <p class="text-sm font-semibold text-amber-800">⚠️ Material pendiente de revisión</p>
+                <p class="flex items-center gap-2 text-sm font-semibold text-amber-800">
+                    <DashIcon name="clock" class="h-4 w-4" />
+                    Material pendiente de revisión
+                </p>
                 <ul class="mt-2 space-y-1 text-sm text-amber-700">
                     <li v-for="r in needingReview" :key="r.id">{{ r.name }} <span class="text-amber-500">· {{ r.category_label }}</span> — {{ r.next_review_at }}</li>
                 </ul>
             </div>
             <div v-if="overdueCheckouts.length" class="rounded-xl border border-brand-200 bg-brand-50 p-4">
-                <p class="text-sm font-semibold text-brand-800">⏰ Material sin devolver (fuera de plazo)</p>
+                <p class="flex items-center gap-2 text-sm font-semibold text-brand-800">
+                    <DashIcon name="warning" class="h-4 w-4" />
+                    Material sin devolver (fuera de plazo)
+                </p>
                 <ul class="mt-2 space-y-2 text-sm text-brand-700">
                     <li v-for="c in overdueCheckouts" :key="c.id" class="flex items-center justify-between gap-2">
                         <span>{{ c.item_name }} <span class="text-brand-500">— {{ c.event_title || c.member_name || 'sin asignar' }}</span> (prev. {{ c.expected_return_at }})</span>
@@ -133,20 +130,24 @@ const inp = 'mt-1 block w-full rounded-lg border-ink-300 text-sm focus:border-br
 
         <DataTable :columns="columns" :rows="items" persist-key="inventory" placeholder="Buscar por nombre o ubicación…">
             <template #filters>
-                <select v-model="categoryFilter" class="input w-auto py-1.5 text-sm" @change="applyFilters">
-                    <option value="">Todas las categorías</option>
-                    <option v-for="c in categories" :key="c.value" :value="c.value">{{ c.label }}</option>
-                </select>
-                <select v-model="conditionFilter" class="input w-auto py-1.5 text-sm" @change="applyFilters">
-                    <option value="">Todos los estados</option>
-                    <option v-for="c in conditions" :key="c.value" :value="c.value">{{ c.label }}</option>
-                </select>
+                <FilterSelect
+                    v-model="categoryFilter"
+                    :options="[{ value: '', label: 'Todas las categorías' }, ...categories]"
+                    @update:model-value="applyFilters"
+                />
+                <FilterSelect
+                    v-model="conditionFilter"
+                    :options="[{ value: '', label: 'Todos los estados' }, ...conditions]"
+                    @update:model-value="applyFilters"
+                />
             </template>
 
             <template #cell-name="{ row }">
                 <div class="flex items-center gap-2.5">
                     <img v-if="row.photo_url" :src="row.photo_url" class="h-9 w-9 rounded-lg object-cover" alt="" />
-                    <span v-else class="flex h-9 w-9 items-center justify-center rounded-lg bg-ink-100 text-ink-400">📦</span>
+                    <span v-else class="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-400">
+                        <DashIcon name="box" class="h-4 w-4" />
+                    </span>
                     <span class="font-medium text-ink-800">{{ row.name }}</span>
                 </div>
             </template>

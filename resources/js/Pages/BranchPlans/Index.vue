@@ -45,7 +45,7 @@ function submit() {
 <template>
     <Head title="Plan de rama" />
 
-    <PageHeader title="Plan de rama" subtitle="Objetivos educativos por curso escolar y rama.">
+    <PageHeader title="Plan de rama" subtitle="Objetivos educativos por curso escolar y rama." icon="target">
         <template #actions>
             <button
                 v-if="canManage"

@@ -7,10 +7,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class LeaderProfile extends Model
 {
     use HasFactory;
+    use LogsActivity;
 
     protected $fillable = [
         'member_id', 'qualification',
@@ -24,6 +27,16 @@ class LeaderProfile extends Model
         'sexual_offenses_certificate_expires_at' => 'date',
         'branches' => 'array',
     ];
+
+    /** Trazabilidad RGPD: certificados y cualificación de responsables. */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('leader_profile')
+            ->logFillable()
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs();
+    }
 
     public function member(): BelongsTo
     {

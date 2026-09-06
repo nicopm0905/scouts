@@ -6,14 +6,20 @@ import PageHeader from '@/Components/Shared/PageHeader.vue'
 import DataTable from '@/Components/Shared/DataTable.vue'
 import BadgeEstado from '@/Components/Shared/BadgeEstado.vue'
 import ConfirmButton from '@/Components/Shared/ConfirmButton.vue'
+import StatCard from '@/Components/Shared/StatCard.vue'
+import AppButton from '@/Components/Shared/AppButton.vue'
+import SectionCard from '@/Components/Shared/SectionCard.vue'
+import FilterSelect from '@/Components/Shared/FilterSelect.vue'
 import { useToast } from '@/composables/useToast'
 import { useAuth } from '@/composables/useAuth'
 
 const props = defineProps({
     invoices: { type: Array, default: () => [] },
     direction: { type: String, default: null },
+    branch: { type: String, default: null },
     categories: { type: Array, default: () => [] },
     directions: { type: Array, default: () => [] },
+    branches: { type: Array, default: () => [] },
 })
 
 const toast = useToast()
@@ -41,11 +47,15 @@ const columns = [
     { key: 'amount', label: 'Base' },
     { key: 'vat', label: 'IVA' },
     { key: 'total', label: 'Total' },
+    { key: 'branch', label: 'Rama' },
     { key: 'category', label: 'Categoría' },
 ]
 
-function filterDirection(dir) {
-    router.get(route('invoices.index'), dir ? { direction: dir } : {}, { preserveState: true })
+function filterInvoices(dir, br) {
+    const params = {}
+    if (dir) params.direction = dir
+    if (br) params.branch = br
+    router.get(route('invoices.index'), params, { preserveState: true })
 }
 function onDrop(e) { dragging.value = false; const f = [...e.dataTransfer.files]; if (f.length) uploadFiles(f) }
 function onPick(e) { const f = [...e.target.files]; if (f.length) uploadFiles(f); e.target.value = '' }
@@ -72,61 +82,65 @@ function generatePdf(row) {
     })
 }
 
-const inp = 'w-full rounded border-ink-200 text-xs focus:border-brand-500 focus:ring-brand-500'
+const inp = 'w-full bg-transparent border-transparent hover:bg-slate-50 focus:bg-white focus:border-brand-500 focus:ring-1 focus:ring-brand-500 rounded text-sm px-2 py-1 transition-colors cursor-pointer focus:cursor-text truncate'
+
 </script>
 
 <template>
     <Head title="Facturas" />
     <AppLayout>
-        <PageHeader title="Facturas" subtitle="Recibidas (gastos) y emitidas, con archivo en Drive.">
-            <template #actions>
-                <div class="inline-flex rounded-lg border border-ink-200 bg-white p-0.5">
-                    <button v-for="opt in [{ value: null, label: 'Todas' }, ...directions]" :key="opt.value ?? 'all'"
-                        class="rounded-md px-3 py-1.5 text-sm font-medium transition"
-                        :class="direction === opt.value ? 'bg-brand-600 text-white' : 'text-ink-600 hover:bg-ink-100'"
-                        @click="filterDirection(opt.value)">{{ opt.label }}</button>
-                </div>
-            </template>
-        </PageHeader>
+        <PageHeader title="Facturas" subtitle="Recibidas (gastos) y emitidas, con archivo en Drive." icon="receipt" />
 
         <!-- Totales -->
-        <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div class="card p-4">
-                <p class="section-title">Gastos (recibidas)</p>
-                <p class="mt-1 text-2xl font-bold text-brand-600">{{ eur(totals.received) }}</p>
-            </div>
-            <div class="card p-4">
-                <p class="section-title">Emitidas</p>
-                <p class="mt-1 text-2xl font-bold text-emerald-600">{{ eur(totals.issued) }}</p>
-            </div>
-            <div class="card p-4">
-                <p class="section-title">Facturas</p>
-                <p class="mt-1 text-2xl font-bold text-ink-800">{{ totals.count }}</p>
-            </div>
+        <div class="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <StatCard label="Gastos (recibidas)" :value="eur(totals.received)" tone="danger" icon="download" />
+            <StatCard label="Emitidas" :value="eur(totals.issued)" tone="positive" icon="upload" />
+            <StatCard label="Facturas" :value="totals.count" icon="receipt" />
         </div>
 
         <!-- Subida masiva -->
-        <div v-if="can('invoices.manage')" class="mb-6">
-            <div class="mb-2 flex items-center gap-3 text-sm">
-                <span class="text-ink-600">Nuevas facturas como:</span>
-                <select v-model="uploadDirection" class="input w-auto py-1 text-sm">
-                    <option v-for="d in directions" :key="d.value" :value="d.value">{{ d.label }}</option>
-                </select>
-            </div>
-            <div class="flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 text-center text-sm transition"
-                :class="dragging ? 'border-brand-500 bg-brand-50' : 'border-ink-300 bg-white'"
-                @dragover.prevent="dragging = true" @dragleave.prevent="dragging = false" @drop.prevent="onDrop">
-                <p class="text-ink-500">Arrastra aquí tus facturas (PDF/imagen) o</p>
-                <label class="btn-primary btn-sm mt-2 cursor-pointer">
+        <SectionCard
+            v-if="can('invoices.manage')"
+            class="mb-5"
+            title="Añadir facturas"
+            subtitle="Arrastra los ficheros o selecciónalos; se archivan en Drive."
+            icon="upload"
+            tone="brand"
+        >
+            <template #actions>
+                <FilterSelect v-model="uploadDirection" :options="directions" label="Registrar como" />
+            </template>
+
+            <div
+                class="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed p-8 text-center text-sm transition-colors duration-200"
+                :class="dragging ? 'border-brand-400 bg-brand-50' : 'border-slate-200 bg-slate-50/60'"
+                @dragover.prevent="dragging = true"
+                @dragleave.prevent="dragging = false"
+                @drop.prevent="onDrop"
+            >
+                <p class="font-medium text-slate-500">Arrastra aquí tus facturas en PDF o imagen</p>
+                <label class="btn-primary btn-sm cursor-pointer">
                     Seleccionar ficheros
                     <input type="file" multiple class="hidden" accept=".pdf,.jpg,.jpeg,.png" @change="onPick" />
                 </label>
             </div>
-        </div>
+        </SectionCard>
 
-        <DataTable :columns="columns" :rows="invoices" persist-key="invoices" placeholder="Buscar factura…">
+        <DataTable :columns="columns" :rows="invoices" persist-key="invoices" placeholder="Buscar factura…" empty-title="No hay facturas">
+            <template #filters>
+                <FilterSelect
+                    :model-value="direction || ''"
+                    :options="[{ value: '', label: 'Todas las direcciones' }, ...directions]"
+                    @update:model-value="filterInvoices($event || null, branch)"
+                />
+                <FilterSelect
+                    :model-value="branch || ''"
+                    :options="[{ value: '', label: 'Todas las ramas' }, ...branches]"
+                    @update:model-value="filterInvoices(direction, $event || null)"
+                />
+            </template>
             <template #cell-date="{ row }">
-                <input v-if="can('invoices.manage')" type="date" :class="inp" style="width:9rem" :value="row.date"
+                <input v-if="can('invoices.manage')" type="date" :class="inp" style="min-width: 110px" :value="row.date"
                     @change="updateInvoice(row, { date: $event.target.value })" />
                 <span v-else>{{ row.date }}</span>
             </template>
@@ -134,39 +148,61 @@ const inp = 'w-full rounded border-ink-200 text-xs focus:border-brand-500 focus:
                 <BadgeEstado :label="row.direction === 'issued' ? 'Emitida' : 'Recibida'" :color="row.direction === 'issued' ? 'blue' : 'gray'" />
             </template>
             <template #cell-supplier_or_client="{ row }">
-                <input v-if="can('invoices.manage')" :class="inp" style="width:10rem" :value="row.supplier_or_client"
-                    @change="updateInvoice(row, { supplier_or_client: $event.target.value })" />
+                <input v-if="can('invoices.manage')" :class="inp" style="min-width: 140px" :value="row.supplier_or_client"
+                    @change="updateInvoice(row, { supplier_or_client: $event.target.value })" placeholder="Proveedor/Cliente" />
                 <span v-else>{{ row.supplier_or_client }}</span>
             </template>
             <template #cell-concept="{ row }">
-                <input v-if="can('invoices.manage')" :class="inp" style="width:10rem" :value="row.concept"
-                    @change="updateInvoice(row, { concept: $event.target.value })" />
+                <input v-if="can('invoices.manage')" :class="inp" style="min-width: 150px" :value="row.concept"
+                    @change="updateInvoice(row, { concept: $event.target.value })" placeholder="Concepto" />
                 <span v-else>{{ row.concept }}</span>
             </template>
             <template #cell-amount="{ row }">
-                <input v-if="can('invoices.manage')" type="number" step="0.01" :class="inp" style="width:6rem" :value="row.amount"
+                <input v-if="can('invoices.manage')" type="number" step="0.01" :class="inp" style="min-width: 80px" :value="row.amount"
                     @change="updateInvoice(row, { amount: $event.target.value })" />
                 <span v-else>{{ eur(row.amount) }}</span>
             </template>
             <template #cell-vat="{ row }">
-                <input v-if="can('invoices.manage')" type="number" step="0.01" :class="inp" style="width:5rem" :value="row.vat"
+                <input v-if="can('invoices.manage')" type="number" step="0.01" :class="inp" style="min-width: 80px" :value="row.vat"
                     @change="updateInvoice(row, { vat: $event.target.value })" />
                 <span v-else>{{ eur(row.vat) }}</span>
             </template>
-            <template #cell-total="{ row }"><span class="font-medium text-ink-800">{{ eur(rowTotal(row)) }}</span></template>
+            <template #cell-total="{ row }"><span class="font-medium text-ink-800 whitespace-nowrap">{{ eur(rowTotal(row)) }}</span></template>
+            <template #cell-branch="{ row }">
+                <select v-if="can('invoices.manage')" :class="[inp, 'cursor-pointer']" style="min-width: 120px" :value="row.branch || ''"
+                    @change="updateInvoice(row, { branch: $event.target.value || null })">
+                    <option value="">(Ninguna)</option>
+                    <option v-for="b in branches" :key="b.value" :value="b.value">{{ b.label }}</option>
+                </select>
+                <span v-else>{{ row.branch_label || '-' }}</span>
+            </template>
             <template #cell-category="{ row }">
-                <select v-if="can('invoices.manage')" :class="inp" :value="row.category"
+                <select v-if="can('invoices.manage')" :class="[inp, 'cursor-pointer']" style="min-width: 150px" :value="row.category"
                     @change="updateInvoice(row, { category: $event.target.value })">
                     <option v-for="c in categories" :key="c.value" :value="c.value">{{ c.label }}</option>
                 </select>
                 <span v-else>{{ row.category_label }}</span>
             </template>
             <template #actions="{ row }">
-                <div class="flex items-center justify-end gap-2">
-                    <a v-if="row.view_url" :href="row.view_url" target="_blank" class="text-xs font-medium text-brand-700 hover:underline">Ver</a>
-                    <button v-if="can('invoices.manage') && row.direction === 'issued'" class="btn-secondary btn-sm" @click="generatePdf(row)">PDF</button>
-                    <ConfirmButton v-if="can('invoices.manage')" message="¿Eliminar esta factura?" confirm-label="Eliminar" @confirm="destroyInvoice(row)">
-                        <span class="rounded-md bg-brand-50 px-2 py-1 text-xs font-semibold text-brand-700 hover:bg-brand-100">Eliminar</span>
+                <div class="flex items-center justify-end gap-1.5">
+                    <AppButton v-if="row.view_url" :href="row.view_url" external size="sm" icon="eye">Ver</AppButton>
+                    <AppButton
+                        v-if="can('invoices.manage') && row.direction === 'issued'"
+                        size="sm"
+                        icon="document"
+                        @click="generatePdf(row)"
+                    >
+                        PDF
+                    </AppButton>
+                    <ConfirmButton
+                        v-if="can('invoices.manage')"
+                        message="¿Eliminar esta factura?"
+                        confirm-label="Eliminar"
+                        @confirm="destroyInvoice(row)"
+                    >
+                        <span class="inline-flex items-center rounded-lg px-2.5 py-1.5 text-xs font-semibold text-rose-600 transition-colors hover:bg-rose-50">
+                            Eliminar
+                        </span>
                     </ConfirmButton>
                 </div>
             </template>

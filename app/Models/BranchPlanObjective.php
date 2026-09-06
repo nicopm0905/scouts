@@ -13,7 +13,7 @@ class BranchPlanObjective extends Model
     use HasFactory;
 
     protected $fillable = [
-        'branch_plan_id', 'description', 'term', 'status', 'position',
+        'branch_plan_id', 'development_area', 'content', 'description', 'term', 'status', 'position',
     ];
 
     protected $casts = [

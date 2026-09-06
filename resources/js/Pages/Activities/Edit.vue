@@ -21,8 +21,12 @@ const form = useForm({
     title: props.activity.title,
     branch: props.activity.branch ?? '',
     duration_minutes: props.activity.duration_minutes ?? '',
+    day_number: props.activity.day_number ?? '',
+    time_slot: props.activity.time_slot ?? '',
+    activity_number: props.activity.activity_number ?? '',
     objectives_text: props.activity.objectives_text ?? '',
     development: props.activity.development ?? '',
+    materials_text: props.activity.materials_text ?? '',
     attachments: [],
     materials: props.activity.materials.length
         ? props.activity.materials.map((m) => ({ name: m.name, quantity: m.quantity, inventory_item_id: m.inventory_item_id ?? '' }))
@@ -60,7 +64,7 @@ function submit() {
 <template>
     <Head title="Editar actividad" />
 
-    <PageHeader title="Editar actividad" :subtitle="activity.title" />
+    <PageHeader title="Editar actividad" :subtitle="activity.title" icon="sparkles" />
 
     <form class="max-w-2xl space-y-4 rounded-lg border border-ink-200 bg-white p-4 sm:p-6" @submit.prevent="submit">
         <FormField v-model="form.title" label="Título" :error="form.errors.title" required />
@@ -71,9 +75,15 @@ function submit() {
             :options="[{ value: '', label: 'Todas las ramas' }, ...branches]"
             :error="form.errors.branch"
         />
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <FormField v-model="form.day_number" label="Día (ej. Día 26)" :error="form.errors.day_number" />
+            <FormField v-model="form.time_slot" type="select" label="Franja" :options="[{value:'', label:'-'}, {value:'Mañana', label:'Mañana / Act. A'}, {value:'Tarde I', label:'Tarde I / Act. B'}, {value:'Tarde II', label:'Tarde II / Act. C'}, {value:'Noche', label:'Noche / Act. D'}]" :error="form.errors.time_slot" />
+            <FormField v-model="form.activity_number" type="number" label="Nº Actividad" :error="form.errors.activity_number" />
+        </div>
         <FormField v-model="form.duration_minutes" type="number" label="Duración (min)" :error="form.errors.duration_minutes" />
         <FormField v-model="form.objectives_text" type="textarea" label="Objetivos educativos" :error="form.errors.objectives_text" />
-        <FormField v-model="form.development" type="textarea" label="Desarrollo (markdown)" :error="form.errors.development" />
+        <FormField v-model="form.development" type="textarea" label="Desarrollo (Mecánica, reglas, etc.)" :error="form.errors.development" />
+        <FormField v-model="form.materials_text" type="textarea" label="Materiales (Texto libre)" :error="form.errors.materials_text" />
 
         <div v-if="activity.attachments.length">
             <label class="block text-sm font-medium text-ink-700">Adjuntos actuales</label>

@@ -76,7 +76,7 @@ function destroyEntry(entry) {
 <template>
     <Head title="Historia del grupo" />
     <AppLayout>
-        <PageHeader title="Historia del grupo" subtitle="Línea de tiempo editable para la página pública.">
+        <PageHeader title="Historia del grupo" subtitle="Línea de tiempo editable para la página pública." icon="clock">
             <template #actions>
                 <button
                     v-if="can('history.manage')"

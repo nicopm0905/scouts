@@ -7,6 +7,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Plans\StoreActivityRequest;
 use App\Http\Requests\Plans\UpdateActivityRequest;
 use App\Models\Activity;
+use App\Models\BranchPlanObjective;
+use App\Models\Event;
 use App\Models\InventoryItem;
 use App\Services\Drive\DriveServiceInterface;
 use App\Services\Plans\ActivityDuplicator;
@@ -18,9 +20,7 @@ use Inertia\Response;
 
 class ActivityController extends Controller
 {
-    public function __construct(private readonly DriveServiceInterface $drive)
-    {
-    }
+    public function __construct(private readonly DriveServiceInterface $drive) {}
 
     public function index(Request $request): Response
     {
@@ -87,11 +87,11 @@ class ActivityController extends Controller
         return Inertia::render('Activities/Show', [
             'activity' => $this->activityDetail($activity),
             'canManage' => $user->can('update', $activity),
-            'availableEvents' => \App\Models\Event::query()
+            'availableEvents' => Event::query()
                 ->orderBy('start_at')
                 ->get(['id', 'title', 'start_at'])
                 ->map(fn ($e) => ['id' => $e->id, 'title' => $e->title, 'start_at' => $e->start_at]),
-            'availableObjectives' => \App\Models\BranchPlanObjective::query()
+            'availableObjectives' => BranchPlanObjective::query()
                 ->with('branchPlan')
                 ->whereHas('branchPlan', function ($q) use ($user) {
                     if (! $user->canSeeAllBranches()) {
@@ -190,8 +190,12 @@ class ActivityController extends Controller
             'branch' => $activity->branch,
             'branch_label' => $activity->branch ? MemberRole::from($activity->branch)->label() : 'Todas',
             'duration_minutes' => $activity->duration_minutes,
+            'day_number' => $activity->day_number,
+            'time_slot' => $activity->time_slot,
+            'activity_number' => $activity->activity_number,
             'objectives_text' => $activity->objectives_text,
             'development' => $activity->development,
+            'materials_text' => $activity->materials_text,
             'attachment_file_ids' => $activity->attachment_file_ids ?? [],
             'attachments' => collect($activity->attachment_file_ids ?? [])->map(fn ($id) => [
                 'id' => $id,

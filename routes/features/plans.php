@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Route;
 | Feature: Plan de rama y biblioteca de actividades (Agente E).
 | Registrado automáticamente por routes/web.php dentro del grupo 'auth'.
 */
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('branch-plans', BranchPlanController::class)
         ->only(['index', 'store', 'show', 'update', 'destroy']);
 

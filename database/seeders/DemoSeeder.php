@@ -52,6 +52,7 @@ class DemoSeeder extends Seeder
             [UserRole::Admin, 'Coordinación', 'admin@grupo.test', null],
             [UserRole::Secretaria, 'Secretaría', 'secretaria@grupo.test', null],
             [UserRole::Tesoreria, 'Tesorería', 'tesoreria@grupo.test', null],
+            [UserRole::Intendencia, 'Intendencia', 'intendencia@grupo.test', null],
             [UserRole::Responsable, 'Resp. Lobatos', 'lobatos@grupo.test', [MemberRole::Lobato->value]],
             [UserRole::Responsable, 'Resp. Pioneros', 'pioneros@grupo.test', [MemberRole::Pionero->value]],
         ];
@@ -135,7 +136,7 @@ class DemoSeeder extends Seeder
         return $members;
     }
 
-    /** 3 familias con hermanos. */
+    /** 3 familias con hermanos. La primera tiene además una cuenta de acceso al portal. */
     private function createFamilies(array $members): void
     {
         $pool = collect($members)->shuffle();
@@ -149,6 +150,17 @@ class DemoSeeder extends Seeder
             // Un tutor de contacto (miembro ficticio adulto).
             $tutor = Member::factory()->create(['role' => MemberRole::Ruta, 'active' => false]);
             $family->members()->attach($tutor->id, ['relationship' => FamilyRelationship::Madre->value]);
+
+            // Cuenta de portal para la primera familia (demo: familia@grupo.test / password).
+            if ($f === 0) {
+                $account = User::factory()->create([
+                    'name' => 'Familia '.$family->name,
+                    'email' => 'familia@grupo.test',
+                    'password' => Hash::make('password'),
+                ]);
+                $account->assignRole(UserRole::Familia->value);
+                $family->users()->attach($account->id);
+            }
         }
     }
 

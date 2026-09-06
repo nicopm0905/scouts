@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\DateOnly;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,11 +12,11 @@ class Attendance extends Model
     use HasFactory;
 
     protected $fillable = [
-        'member_id', 'event_id', 'date', 'present', 'recorded_by',
+        'member_id', 'event_id', 'date', 'present', 'notes', 'recorded_by',
     ];
 
     protected $casts = [
-        'date' => 'date',
+        'date' => DateOnly::class,
         'present' => 'boolean',
     ];
 

@@ -24,7 +24,7 @@ function submit() {
 <template>
     <Head title="Nueva familia" />
     <AppLayout>
-        <PageHeader title="Nueva familia" />
+        <PageHeader title="Nueva familia" icon="heart" />
 
         <form class="max-w-xl space-y-4 rounded-lg border border-slate-200 bg-white p-6" @submit.prevent="submit">
             <FormField v-model="form.name" label="Nombre de familia" required :error="form.errors.name" />

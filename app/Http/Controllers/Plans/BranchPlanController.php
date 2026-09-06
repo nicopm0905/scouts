@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Plans;
 
 use App\Enums\MemberRole;
+use App\Enums\ObjectiveStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Plans\StoreBranchPlanRequest;
 use App\Http\Requests\Plans\UpdateBranchPlanRequest;
@@ -61,6 +62,8 @@ class BranchPlanController extends Controller
                 'completion_percentage' => $branchPlan->completionPercentage(),
                 'objectives' => $branchPlan->objectives->map(fn ($o) => [
                     'id' => $o->id,
+                    'development_area' => $o->development_area,
+                    'content' => $o->content,
                     'description' => $o->description,
                     'term' => $o->term,
                     'status' => $o->status->value,
@@ -103,7 +106,7 @@ class BranchPlanController extends Controller
             'by_term' => collect([1, 2, 3])->mapWithKeys(function (int $term) use ($plan) {
                 $objectives = $plan->objectives->where('term', $term);
                 $total = $objectives->count();
-                $done = $objectives->where('status', \App\Enums\ObjectiveStatus::Logrado)->count();
+                $done = $objectives->where('status', ObjectiveStatus::Logrado)->count();
 
                 return [$term => [
                     'total' => $total,

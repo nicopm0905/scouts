@@ -1,0 +1,25 @@
+Fotos de la web publica (landing).
+
+IMPORTANTE — formato: los navegadores NO muestran fotos HEIC (el formato por
+defecto del iPhone), aunque les cambies la extension a .jpg. Si subes una,
+la web la ignora y vuelve a dibujar el fondo ilustrado.
+
+  - En el iPhone: Ajustes > Camara > Formatos > "Mas compatible" (JPEG),
+    o al compartir la foto elige "Copia JPEG" / exporta desde Fotos como JPEG.
+  - Si ya tienes el HEIC en el ordenador, conviertelo (ffmpeg):
+      ffmpeg -i foto.heic -filter_complex "[0:g:0]scale=2400:-2[o]" -map "[o]" -q:v 3 hero.jpg
+
+Coloca aqui las imagenes con estos nombres exactos (JPEG o PNG, ~1600-2400px de ancho):
+
+  hero.jpg         Foto principal de portada (horizontal, con espacio libre abajo a la izquierda)
+  grupo.jpg        Foto del grupo / responsables (seccion "Quienes somos", proporcion 4:3)
+  campamento.jpg   Foto del campamento de verano (banda horizontal)
+  castores.jpg     Seccion Castores
+  lobatos.jpg      Seccion Lobatos
+  rangers.jpg      Seccion Rangers
+  pioneros.jpg     Seccion Pioneros
+  rutas.jpg        Seccion Rutas
+
+Si un fichero no existe (o no es un formato valido), la web muestra
+automaticamente un fondo ilustrado en su lugar. No hace falta tocar codigo.
+Los nombres se configuran en config/group.php.

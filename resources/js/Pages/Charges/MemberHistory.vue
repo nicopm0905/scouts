@@ -22,7 +22,7 @@ const columns = [
 <template>
     <Head :title="`Historial de ${member.name}`" />
     <AppLayout>
-        <PageHeader :title="`Historial de pagos: ${member.name}`" :subtitle="member.branch">
+        <PageHeader :title="`Historial de pagos: ${member.name}`" :subtitle="member.branch" icon="euro">
             <template #actions>
                 <Link :href="route('charges.index')" class="text-sm text-slate-500 hover:underline">← Volver a cobros</Link>
             </template>

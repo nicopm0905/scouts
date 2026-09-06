@@ -15,6 +15,8 @@ class StoreChecklistItemRequest extends FormRequest
     {
         return [
             'label' => ['required', 'string', 'max:255'],
+            'assigned_to' => ['nullable', 'integer', 'exists:users,id'],
+            'due_at' => ['nullable', 'date'],
         ];
     }
 }

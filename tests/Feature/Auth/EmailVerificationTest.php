@@ -31,6 +31,17 @@ test('email can be verified', function () {
     $response->assertRedirect(route('dashboard', absolute: false).'?verified=1');
 });
 
+test('un usuario sin verificar no accede a las rutas de features', function () {
+    $user = userWithRole('secretaria');
+    $user->forceFill(['email_verified_at' => null])->save();
+
+    $this->actingAs($user)->get(route('events.index'))
+        ->assertRedirect(route('verification.notice'));
+
+    $this->actingAs($user)->get(route('members.index'))
+        ->assertRedirect(route('verification.notice'));
+});
+
 test('email is not verified with invalid hash', function () {
     $user = User::factory()->unverified()->create();
 

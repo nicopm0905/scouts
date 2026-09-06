@@ -4,6 +4,7 @@ namespace App\Http\Requests\Finance;
 
 use App\Enums\InvoiceCategory;
 use App\Enums\InvoiceDirection;
+use App\Enums\MemberRole;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -25,6 +26,7 @@ class UpdateInvoiceRequest extends FormRequest
             'amount' => ['required', 'numeric', 'min:0'],
             'vat' => ['nullable', 'numeric', 'min:0'],
             'category' => ['required', Rule::in(InvoiceCategory::values())],
+            'branch' => ['nullable', Rule::in(MemberRole::values())],
         ];
     }
 }

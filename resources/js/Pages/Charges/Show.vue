@@ -37,6 +37,25 @@ const columns = [
 const paying = ref(null)
 const payForm = useForm({ payment_method: props.paymentMethods[0]?.value ?? '', notes: '' })
 
+// Cobro en bloque: tras una salida, cerrar en efectivo a varios de una vez.
+const pendingRows = computed(() => props.assignments.filter((a) => a.status === 'pending'))
+const selected = ref([])
+const bulkForm = useForm({ assignment_ids: [], payment_method: props.paymentMethods[0]?.value ?? '' })
+const allPendingSelected = computed(() => pendingRows.value.length > 0 && selected.value.length === pendingRows.value.length)
+
+function toggleAllPending() {
+    selected.value = allPendingSelected.value ? [] : pendingRows.value.map((r) => r.id)
+}
+function submitBulk() {
+    if (!selected.value.length) return
+    bulkForm.assignment_ids = selected.value
+    bulkForm.post(route('charges.members.bulk-mark-paid', props.charge.id), {
+        preserveScroll: true,
+        preserveState: true,
+        onSuccess: () => { toast.success('Pagos registrados.'); selected.value = [] },
+    })
+}
+
 function openPay(row) {
     paying.value = row
     payForm.payment_method = props.paymentMethods[0]?.value ?? ''
@@ -45,24 +64,36 @@ function openPay(row) {
 function markPaid() {
     payForm.post(route('charges.members.mark-paid', paying.value.id), {
         preserveScroll: true,
+        preserveState: true,
         onSuccess: () => { toast.success('Pago registrado.'); paying.value = null },
     })
 }
 function remind() {
     router.post(route('charges.remind', props.charge.id), {}, {
         preserveScroll: true,
+        preserveState: true,
         onSuccess: () => toast.success('Recordatorios enviados a los pendientes.'),
     })
+}
+function whatsAppPaymentReminder(row) {
+    if (!row.phone) return '#'
+    const cleanPhone = row.phone.replace(/\D/g, '')
+    const fullPhone = cleanPhone.length === 9 ? `34${cleanPhone}` : cleanPhone
+    const text = `⚜️ *SCOUTS DE SAN JOSÉ* ⚜️\n💶 *RECORDATORIO DE PAGO*\n\nHola! Te escribimos de Scouts de San José para recordarte que está pendiente el pago de *${props.charge.title}* por importe de *${eur(row.amount)}* de *${row.member_name}*.\n\nPor favor, avísanos cuando lo realices. ¡Muchas gracias! ⚜️`
+    return `https://wa.me/${fullPhone}?text=${encodeURIComponent(text)}`
 }
 </script>
 
 <template>
     <Head :title="charge.title" />
     <AppLayout>
-        <PageHeader :title="charge.title" :subtitle="charge.type_label">
+        <PageHeader :title="charge.title" :subtitle="charge.type_label" icon="euro">
             <template #actions>
+                <Link v-if="charge.event_id" :href="route('events.show', charge.event_id)" class="btn-secondary btn-sm">
+                    Ir al evento
+                </Link>
                 <button v-if="can.manage && summary.pending_count > 0" class="btn-secondary btn-sm" @click="remind">
-                    🔔 Recordar a pendientes ({{ summary.pending_count }})
+                    Recordar a pendientes ({{ summary.pending_count }})
                 </button>
                 <Link :href="route('charges.index')" class="btn-ghost btn-sm">← Volver</Link>
             </template>
@@ -94,6 +125,23 @@ function remind() {
             </div>
         </div>
 
+        <!-- Cobro en bloque (efectivo en mano tras una salida) -->
+        <div v-if="can.manage && pendingRows.length" class="mb-4 flex flex-col gap-3 rounded-xl border border-emerald-200 bg-emerald-50/60 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <label class="flex items-center gap-2 text-sm font-medium text-ink-700">
+                <input type="checkbox" :checked="allPendingSelected" class="rounded border-ink-300 text-emerald-600 focus:ring-emerald-500" @change="toggleAllPending" />
+                Seleccionar los {{ pendingRows.length }} pendientes
+                <span v-if="selected.length" class="text-emerald-700">· {{ selected.length }} marcados</span>
+            </label>
+            <div class="flex flex-wrap items-center gap-2">
+                <select v-model="bulkForm.payment_method" class="input min-w-0 py-1.5 text-sm">
+                    <option v-for="m in paymentMethods" :key="m.value" :value="m.value">{{ m.label }}</option>
+                </select>
+                <button class="btn-primary btn-sm" :disabled="!selected.length || bulkForm.processing" @click="submitBulk">
+                    Marcar como pagados ({{ selected.length }})
+                </button>
+            </div>
+        </div>
+
         <DataTable :columns="columns" :rows="filtered" persist-key="charge-assignments" placeholder="Buscar miembro…">
             <template #filters>
                 <div class="inline-flex rounded-lg border border-ink-200 bg-white p-0.5 text-sm">
@@ -108,7 +156,13 @@ function remind() {
                 <BadgeEstado :label="row.status_label" :color="row.status_color" />
             </template>
             <template #actions="{ row }">
-                <div class="flex items-center justify-end gap-3">
+                <div class="flex items-center justify-end gap-2">
+                    <label v-if="can.manage && row.status === 'pending'" class="flex items-center" :title="`Seleccionar a ${row.member_name} para cobro en bloque`">
+                        <input type="checkbox" :value="row.id" v-model="selected" class="rounded border-ink-300 text-emerald-600 focus:ring-emerald-500" />
+                    </label>
+                    <a v-if="row.phone && row.status !== 'paid'" :href="whatsAppPaymentReminder(row)" target="_blank" class="rounded-lg bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-800 hover:bg-emerald-200 transition">
+                        💬 Recordatorio
+                    </a>
                     <Link :href="route('charges.members.history', row.member_id)" class="text-sm text-ink-500 hover:underline">Historial</Link>
                     <button v-if="can.manage && row.status !== 'paid'" class="btn-primary btn-sm" @click="openPay(row)">Marcar pagado</button>
                 </div>

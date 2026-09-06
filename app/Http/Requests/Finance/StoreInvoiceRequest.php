@@ -4,6 +4,8 @@ namespace App\Http\Requests\Finance;
 
 use App\Enums\InvoiceCategory;
 use App\Enums\InvoiceDirection;
+use App\Enums\MemberRole;
+use App\Models\Invoice;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -12,7 +14,7 @@ class StoreInvoiceRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('create', \App\Models\Invoice::class);
+        return $this->user()->can('create', Invoice::class);
     }
 
     public function rules(): array
@@ -25,6 +27,7 @@ class StoreInvoiceRequest extends FormRequest
             'amount' => ['required', 'numeric', 'min:0'],
             'vat' => ['nullable', 'numeric', 'min:0'],
             'category' => ['required', Rule::in(InvoiceCategory::values())],
+            'branch' => ['nullable', Rule::in(MemberRole::values())],
         ];
     }
 }

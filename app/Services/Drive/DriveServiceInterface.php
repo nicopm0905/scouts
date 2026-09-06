@@ -18,8 +18,11 @@ interface DriveServiceInterface
     /** Sube contenido en crudo (p. ej. un PDF generado en memoria). */
     public function uploadRaw(string $contents, string $name, string $mimeType, ?string $folderId = null): DriveFile;
 
-    /** Crea una carpeta (opcionalmente dentro de otra) y devuelve su id. */
-    public function createFolder(string $name, ?string $parentId = null): string;
+    /** Crea una carpeta (opcionalmente dentro de otra y con un color) y devuelve su id. */
+    public function createFolder(string $name, ?string $parentId = null, ?string $colorRgb = null): string;
+
+    /** Busca una carpeta por nombre (opcionalmente dentro de otra) y devuelve su id si existe. */
+    public function searchFolder(string $name, ?string $parentId = null): ?string;
 
     /** Descarga el contenido en crudo de un fichero. */
     public function download(string $fileId): string;

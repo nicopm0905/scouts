@@ -29,6 +29,9 @@
                 <th>Rama</th>
                 <th>Teléfono de contacto</th>
                 <th>Datos médicos</th>
+                @if($showPayment ?? false)
+                    <th>Pago</th>
+                @endif
             </tr>
         </thead>
         <tbody>
@@ -38,9 +41,12 @@
                     <td>{{ $row['role_label'] }}</td>
                     <td>{{ $row['phone'] ?? '—' }}</td>
                     <td>{{ $row['health_summary'] }}</td>
+                    @if($showPayment ?? false)
+                        <td>{{ $row['payment_label'] ?? '—' }}</td>
+                    @endif
                 </tr>
             @empty
-                <tr><td colspan="4">No hay inscritos confirmados todavía.</td></tr>
+                <tr><td colspan="{{ ($showPayment ?? false) ? 5 : 4 }}">No hay inscritos confirmados todavía.</td></tr>
             @endforelse
         </tbody>
     </table>

@@ -8,7 +8,7 @@ class UpdateFinanceSettingsRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('settings.manage');
+        return $this->user()->can('settings.finance');
     }
 
     public function rules(): array

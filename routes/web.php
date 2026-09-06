@@ -6,14 +6,18 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function () {
+/*
+| La portada pública ('/') la registra routes/features/site.php.
+| Esta ruta es la presentación de la plataforma de gestión para responsables.
+*/
+Route::get('/plataforma', function () {
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
     ]);
-});
+})->name('platform');
 
 Route::get('/dashboard', DashboardController::class)
     ->middleware(['auth', 'verified'])

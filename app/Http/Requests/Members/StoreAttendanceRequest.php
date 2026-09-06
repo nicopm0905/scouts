@@ -21,6 +21,7 @@ class StoreAttendanceRequest extends FormRequest
             'attendance' => ['required', 'array'],
             'attendance.*.member_id' => ['required', 'integer', 'exists:members,id'],
             'attendance.*.present' => ['boolean'],
+            'attendance.*.notes' => ['nullable', 'string', 'max:500'],
         ];
     }
 }

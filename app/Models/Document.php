@@ -7,10 +7,14 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Document extends Model
 {
     use HasFactory;
+    use LogsActivity;
 
     protected $fillable = [
         'title', 'category', 'drive_file_id', 'external_url',
@@ -22,9 +26,24 @@ class Document extends Model
         'expires_at' => 'date',
     ];
 
+    /** Trazabilidad: alta/cambio de documentos oficiales. */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('document')
+            ->logFillable()
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs();
+    }
+
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function signatures(): MorphMany
+    {
+        return $this->morphMany(Signature::class, 'signable');
     }
 
     public function isExpired(): bool

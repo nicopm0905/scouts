@@ -14,9 +14,7 @@ use Inertia\Response;
 
 class MemberImportController extends Controller
 {
-    public function __construct(private readonly MemberImportService $importService)
-    {
-    }
+    public function __construct(private readonly MemberImportService $importService) {}
 
     public function create(): Response
     {
@@ -29,24 +27,26 @@ class MemberImportController extends Controller
     {
         $result = $this->importService->import($request->file('file'));
 
+        $counts = "{$result['created']} creados, {$result['updated']} actualizados";
+
         if (! empty($result['errors'])) {
             $summary = collect($result['errors'])
                 ->map(fn ($e) => "Fila {$e['row']}: ".implode(' ', $e['errors']))
                 ->implode(' | ');
 
-            return back()->with('error', "Importados {$result['created']}. Errores: {$summary}");
+            return back()->with('error', "Importados ({$counts}). Errores: {$summary}");
         }
 
-        return redirect()->route('members.index')->with('success', "Importados {$result['created']} miembros correctamente.");
+        return redirect()->route('members.index')->with('success', "Importación completada: {$counts}.");
     }
 
     public function template(): HttpResponse
     {
         Gate::authorize('create', Member::class);
 
-        return response($this->importService->templateCsv(), 200, [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="plantilla_miembros.csv"',
+        return response($this->importService->templateExcel(), 200, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="plantilla_miembros.xlsx"',
         ]);
     }
 }

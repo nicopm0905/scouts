@@ -1,19 +1,19 @@
 <?php
 
-test('registration screen can be rendered', function () {
-    $response = $this->get('/register');
+// El registro público está desactivado: las cuentas las crea un administrador.
 
-    $response->assertStatus(200);
+test('registration screen is not available', function () {
+    $this->get('/register')->assertNotFound();
 });
 
-test('new users can register', function () {
-    $response = $this->post('/register', [
+test('guests cannot self-register', function () {
+    $this->post('/register', [
         'name' => 'Test User',
         'email' => 'test@example.com',
         'password' => 'password',
         'password_confirmation' => 'password',
-    ]);
+    ])->assertNotFound();
 
-    $this->assertAuthenticated();
-    $response->assertRedirect(route('dashboard', absolute: false));
+    $this->assertGuest();
+    $this->assertDatabaseMissing('users', ['email' => 'test@example.com']);
 });
