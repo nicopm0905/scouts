@@ -18,6 +18,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // La app corre detrás del proxy de Render/Cloudflare: hay que confiar en
+        // las cabeceras X-Forwarded-* para que Laravel sepa que la petición es HTTPS
+        // (si no, genera las URLs de los assets en http:// y el navegador los bloquea).
+        $middleware->trustProxies(at: '*');
+
         $middleware->web(append: [
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,

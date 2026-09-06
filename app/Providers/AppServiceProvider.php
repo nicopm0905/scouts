@@ -28,8 +28,11 @@ class AppServiceProvider extends ServiceProvider
     {
         Vite::prefetch(concurrency: 3);
 
-        // La app maneja datos de salud de menores: en producción todo por HTTPS.
-        if ($this->app->environment('production')) {
+        // La app maneja datos de salud de menores: fuera de local, todo por HTTPS.
+        // Se fuerza también si APP_URL ya es https, sin depender de que APP_ENV
+        // esté bien puesto en el entorno de despliegue.
+        if (! $this->app->environment('local')
+            || str_starts_with((string) config('app.url'), 'https://')) {
             URL::forceScheme('https');
         }
 
