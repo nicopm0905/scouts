@@ -28,8 +28,8 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Copy project files
 COPY . .
 
-# Install PHP dependencies (ignore platform requirements for compatibility)
-RUN composer install --no-dev --optimize-autoloader --ignore-platform-req=php
+# Install PHP dependencies
+RUN composer install --no-dev --optimize-autoloader
 
 # Install Node dependencies and build
 RUN npm install && npm run build
