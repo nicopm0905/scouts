@@ -10,13 +10,20 @@ defineOptions({ layout: AppLayout })
 const props = defineProps({
     branches: { type: Array, default: () => [] },
     inventoryItems: { type: Array, default: () => [] },
+    catalog: { type: Object, required: true },
 })
 
 const toast = useToast()
+const slotOptions = props.catalog.time_slots.map((s) => ({ value: s.value, label: `${s.label} (${s.from}-${s.to} h)` }))
 
 const form = useForm({
     title: '',
     branch: '',
+    activity_type: '',
+    owner: '',
+    scheduled_date: '',
+    place: '',
+    evaluation: '',
     duration_minutes: '',
     day_number: '',
     time_slot: '',
@@ -65,15 +72,35 @@ function submit() {
             :options="[{ value: '', label: 'Todas las ramas' }, ...branches]"
             :error="form.errors.branch"
         />
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <FormField
+                v-model="form.activity_type"
+                type="select"
+                label="Tipo"
+                :options="[{ value: '', label: 'Elige uno...' }, ...catalog.activity_types]"
+                :error="form.errors.activity_type"
+            />
+            <FormField v-model="form.owner" label="Encargado" placeholder="Patrullas, Tropa, Kraal…" :error="form.errors.owner" />
+            <FormField v-model="form.scheduled_date" type="date" label="Fecha" :error="form.errors.scheduled_date" />
+            <FormField v-model="form.place" label="Sitio" placeholder="Colegio San José" :error="form.errors.place" />
+        </div>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <FormField v-model="form.day_number" label="Día (ej. Día 26)" :error="form.errors.day_number" />
-            <FormField v-model="form.time_slot" type="select" label="Franja" :options="[{value:'', label:'-'}, {value:'Mañana', label:'Mañana / Act. A'}, {value:'Tarde I', label:'Tarde I / Act. B'}, {value:'Tarde II', label:'Tarde II / Act. C'}, {value:'Noche', label:'Noche / Act. D'}]" :error="form.errors.time_slot" />
+            <FormField
+                v-model="form.time_slot"
+                type="select"
+                label="Franja"
+                :options="[{ value: '', label: '-' }, ...slotOptions]"
+                :error="form.errors.time_slot"
+            />
             <FormField v-model="form.activity_number" type="number" label="Nº Actividad" :error="form.errors.activity_number" />
         </div>
         <FormField v-model="form.duration_minutes" type="number" label="Duración (min)" :error="form.errors.duration_minutes" />
         <FormField v-model="form.objectives_text" type="textarea" label="Objetivos educativos" :error="form.errors.objectives_text" />
         <FormField v-model="form.development" type="textarea" label="Desarrollo (Mecánica, reglas, etc.)" :error="form.errors.development" />
         <FormField v-model="form.materials_text" type="textarea" label="Materiales (Texto libre)" :error="form.errors.materials_text" />
+        <FormField v-model="form.evaluation" type="textarea" label="Evaluación (¿cómo ha salido?)" :error="form.errors.evaluation" />
 
         <div>
             <label class="block text-sm font-medium text-ink-700">Adjuntos</label>

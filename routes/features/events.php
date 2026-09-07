@@ -42,6 +42,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/eventos/{event}/pdf/zip', [EventPdfController::class, 'downloadZip'])->name('events.pdf.zip');
     Route::get('/eventos/{event}/pdf/dossier', [EventPdfController::class, 'dossier'])->name('events.pdf.dossier');
     Route::get('/eventos/{event}/pdf/material', [EventPdfController::class, 'materials'])->name('events.pdf.materials');
+    Route::get('/eventos/{event}/pdf/ficha-salida', [EventPdfController::class, 'mscOuting'])->name('events.pdf.msc-outing');
 
     // Exportación del calendario a PDF
     Route::get('/eventos-calendario/pdf', [EventPdfController::class, 'calendar'])->name('events.pdf.calendar');

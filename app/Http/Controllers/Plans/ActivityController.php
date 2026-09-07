@@ -12,6 +12,7 @@ use App\Models\Event;
 use App\Models\InventoryItem;
 use App\Services\Drive\DriveServiceInterface;
 use App\Services\Plans\ActivityDuplicator;
+use App\Support\MscPlanCatalog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -61,6 +62,7 @@ class ActivityController extends Controller
         return Inertia::render('Activities/Create', [
             'branches' => $this->branchOptions(),
             'inventoryItems' => $this->inventoryOptions(),
+            'catalog' => MscPlanCatalog::forFrontend(),
         ]);
     }
 
@@ -116,6 +118,7 @@ class ActivityController extends Controller
             'activity' => $this->activityDetail($activity),
             'branches' => $this->branchOptions(),
             'inventoryItems' => $this->inventoryOptions(),
+            'catalog' => MscPlanCatalog::forFrontend(),
         ]);
     }
 
@@ -189,6 +192,12 @@ class ActivityController extends Controller
             'title' => $activity->title,
             'branch' => $activity->branch,
             'branch_label' => $activity->branch ? MemberRole::from($activity->branch)->label() : 'Todas',
+            'activity_type' => $activity->activity_type?->value,
+            'activity_type_label' => $activity->activity_type?->label(),
+            'owner' => $activity->owner,
+            'scheduled_date' => $activity->scheduled_date?->toDateString(),
+            'place' => $activity->place,
+            'evaluation' => $activity->evaluation,
             'duration_minutes' => $activity->duration_minutes,
             'day_number' => $activity->day_number,
             'time_slot' => $activity->time_slot,

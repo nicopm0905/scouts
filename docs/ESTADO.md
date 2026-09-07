@@ -5,7 +5,7 @@
 > cada cambio funcional (regla en [CLAUDE.md](../CLAUDE.md)). Si vas a empezar algo, mira aquí
 > primero para no rehacer lo que ya está.
 >
-> Última revisión completa: **2026-09-06**.
+> Última revisión completa: **2026-09-07**.
 
 ---
 
@@ -58,10 +58,10 @@ Controladores: `Members/*` · Páginas: `Pages/Members/*` · Rutas: `routes/feat
 | Control de asistencia (rejilla móvil, incidencias, guardar en 1 clic) | ✅ | `AttendanceController` + `Pages/Members/Attendance.vue`; `updateOrCreate` idempotente, anti-IDOR. Recuerda la última rama (`localStorage`) y muestra resumen del trimestre (`quarterStats`). |
 | Importador CSV de censo (+ plantilla) | ✅ | `MemberImportController` + `MemberImportService` |
 | Exportación CSV del censo | ✅ | `MemberController@export` (formato genérico) |
+| Campos de censo MSC en la ficha (`dni`, `sex`, `address`) | ✅ | migración `add_census_fields_to_members_table`; en `MemberForm.vue` |
+| **Exportación censo oficial MSC** | ✅ | `MemberController@censusMsc` (`/members/censo-msc`): sección, cargo, datos identificativos, contacto, titulación y cert. de delitos sexuales del kraal. Columnas a afinar con el fichero real de la federación. |
 | **Firma digital de consentimientos por email** | ✅ | `SignatureController` + flujo público `/publico/firma/{token}` (`Signature`, `SignatureStatus`) |
-| Autoservicio de la familia para revisar datos del hijo | ✅ | La familia propone cambios de teléfono/email y ficha médica desde `Portal/Child` (`Portal\ChildController@submitReview`); secretaría los revisa y aplica en **Revisiones de familias** (`Members\ChangeRequestController`, `/revisiones-familias`). Modelo `MemberChangeRequest` (columna `payload`). Aviso en el dashboard. |
-| Renovación anual de plaza (confirmar continuidad) | ⬜ | siguiente slice de la Épica E |
-| Re-recogida de consentimientos en lote al inicio de curso | ⬜ | reaprovechará `Signature` — Épica E |
+| **Autoservicio de la familia: revisión de datos + campaña de inicio de curso** | ✅ | Desde `Portal/Child`, un formulario: datos del scout, ficha médica, contacto de la familia, consentimientos (RGPD/imagen/salidas con texto legal) y renovación de plaza ("¿continúa el curso {año}?"). Crea un `MemberChangeRequest` (columna `payload`, grupos `member`/`health`/`family`/`consents`/`renewal`). Secretaría revisa el antes→después y aprueba/rechaza en **Revisiones de familias** (`/revisiones-familias`, `Members\ChangeRequestController`). Al aprobar: escribe `Member`, `HealthRecord` (si `members.sensitive`), `Family`, `Consent` (`signed_at`=hoy) y, si la familia dijo que NO continúa, `active=false`. Aviso en el dashboard. |
 | Exportación **censo oficial MSC** (formato requerido) | ⬜ | el export actual es genérico |
 
 ### 3.2 Tesorería — ✅ / 🟡
@@ -75,7 +75,7 @@ Controladores: `Finance/*` · Páginas: `Pages/Finance/*`, `Pages/Charges/*`, `P
 | Marcar pagado **en bloque** (efectivo, tras una salida) | ✅ | `ChargeController@bulkMarkPaid` + `POST /cobros/{charge}/marcar-pagados`; casillas por fila pendiente en `Charges/Show` |
 | Recordatorios de pago (Mailable + Job + comando) | ✅ | `charges:send-reminders`, cableado en `schedule` (diario 08:00) |
 | Facturas (entrada/salida, categoría, estado) + PDF vía Drive | ✅ | `InvoiceController`, `InvoicePdfService` |
-| Presupuestos (`Budget`, `BudgetItem`, estado) | 🟡 | CRUD y líneas; falta cuadro presupuesto vs. real por evento/rama en el informe |
+| Presupuestos (`Budget`, `BudgetItem`, estado) + **presupuesto vs. real** | ✅ | `Budget::summary()` (previsto/real/desvío). El informe económico lista cada presupuesto de evento del periodo con su desvío (+ CSV); `Budgets/Show` muestra el desvío del balance |
 | Informe económico con gráficas (evolución mensual, desglose por categoría) + export | ✅ | `FinanceReportController`, `FinanceReportService`, `Pages/Finance/Report` |
 | Ajustes fiscales (`finance.*` en `Setting`) | ✅ | `SettingsController` |
 | Marcar pagado **en bloque** (varios `ChargeMember` a la vez, en efectivo) | ⬜ | hoy es uno a uno; útil tras una salida — ver ROADMAP Épica D |
@@ -97,7 +97,7 @@ Controladores: `Events/*` · Páginas: `Pages/Events/*` · Rutas: `routes/featur
 | Checklist del evento (`EventChecklistItem`) | ✅ | `EventChecklistController` |
 | Cobro asociado al evento (`EventChargeController`) | ✅ | crea un `Charge` desde el evento |
 | Disponibilidad de inventario para el evento | ✅ | `InventoryEventAvailabilityController` |
-| PDFs: asistentes, circular, autorización individual, ZIP, **dossier**, **lista de material** | ✅ | `EventPdfController`; `events.pdf.materials` = material agregado de todas las actividades (`EventMaterialList`) con cruce de disponibilidad |
+| PDFs: asistentes, circular, autorización individual, ZIP, **dossier**, **lista de material**, **ficha de salida MSC** | ✅ | `EventPdfController`; `events.pdf.materials` (material agregado con cruce de disponibilidad) y `events.pdf.msc-outing` (el impreso oficial de la delegación) |
 | Suscripción iCal de solo lectura (token por usuario) | ✅ | `IcalController`, `IcalGenerator`, `User.ical_token` |
 | Exportación del calendario a PDF | ✅ | `EventPdfController@calendar` |
 | **Reparto de tareas del kraal para la salida** | ✅ | `EventChecklistItem.assigned_to` + `due_at`; se asigna desde `Events/Show` y las tareas sin cerrar salen en el panel de inicio de esa persona (`DashboardController` prop `tasks`). Sin recordatorios automáticos. |
@@ -114,9 +114,9 @@ Controladores: `Secretary/*` · Páginas: `Pages/Documents/*`, `Pages/Minutes/*`
 | Firma digital de documentos por email | ✅ | `SignatureController@sendDocument` + flujo público |
 | Actas (`Minute`, `MinuteItem`) + PDF | ✅ | `MinuteController`, `MinutePdfService` |
 | Estructura de carpetas en Drive (`DriveStructureService`) | ✅ | crea el árbol SECRETARÍA / TESORERÍA / … |
-| Memoria anual / informe de actividades del curso | ⬜ | no hay generador; se hace fuera |
+| **Memoria del curso** | ✅ | `Reports\AnnualReportController` (`/memoria`, `/memoria/pdf`) + `AnnualReportService`: objetivos por plan de rama, eventos realizados, asistencia media y censo, por curso escolar. Página + PDF. Acotada por rama. Ver §3.11. |
 
-### 3.5 Plan de rama y actividades — ✅ / 🟡
+### 3.5 Plan de rama y actividades — ✅
 Controladores: `Plans/*` · Páginas: `Pages/BranchPlans/*`, `Pages/Activities/*` · Rutas: `routes/features/plans.php`
 
 | Elemento | Estado | Notas |
@@ -126,8 +126,13 @@ Controladores: `Plans/*` · Páginas: `Pages/BranchPlans/*`, `Pages/Activities/*
 | Vincular actividad ↔ evento y actividad ↔ objetivo | ✅ | `ActivityScheduleController`, `ActivityObjectiveController` |
 | Campos MSC de actividad (día, franja, nº, materiales en texto) | ✅ | migración MSC |
 | Material agregado de un evento (suma de `ActivityMaterial` de sus actividades) | ✅ | `App\Services\Events\EventMaterialList`; PDF `events.pdf.materials` + tabla en el dossier |
-| **Ficha de sesión imprimible del día** (guion) | 🟡 | el guion sale en el dossier por actividad; falta hoja ligera de una reunión suelta si se pide |
-| Generación del calendario del trimestre desde el plan | ⬜ | hoy se crean los eventos a mano — ROADMAP Épica F |
+| Generación del calendario del trimestre desde el plan | ✅ | `BranchPlanScheduleController@store` (`POST /branch-plans/{plan}/reuniones`): crea las reuniones semanales de un tramo en bloque, con vista previa en `BranchPlans/Show`. No duplica ni pisa `skip_dates`. |
+| **Formato oficial MSC del plan de rama** | ✅ | Catálogo de la delegación en `App\Support\MscPlanCatalog` (Ámbito → Línea → Contenido) + enums `MscScope` y `ActivityType`. El objetivo se rellena como en el impreso: ámbito, línea, contenido, "¿cómo estamos?", verbo + complemento y "¿cómo ha salido?" (`branch_plan_objectives.scope/line/current_situation/goal_verb/goal_complement/evaluation`). Desplegables encadenados en `BranchPlans/Show`. |
+| **Hoja de programación trimestral (PDF)** | ✅ | `Plans\BranchPlanPdfController@term` (`/branch-plans/{plan}/pdf/trimestre/{term}`) + `App\Services\Plans\TermPlanSheet` + `pdf/branch-plan-term.blade.php`: tabla de ámbitos, calendario del trimestre (reuniones y salidas de la rama), evaluación y ficha de cada actividad. Enlace en cada tarjeta de trimestre. |
+| **Ficha de salida oficial MSC (PDF)** | ✅ | `Events\EventPdfController@mscOuting` (`/eventos/{event}/pdf/ficha-salida`) + `App\Services\Events\MscOutingSheet` + `pdf/event-msc-outing.blade.php` (membrete compartido `pdf/partials/msc-letterhead`): DATOS SALIDA (responsable, curso, grupo, rama, niños, responsables con/sin titulación, fecha y lugar), las tres tablas de ámbito y la rejilla ESTRUCTURA por día y franja. Enlace en `Events/Show`. |
+| **Actividades y objetivos en la ficha del evento** | ✅ | Sección "Actividades y objetivos del plan" en `Events/Show`: cada actividad enlazada con su tipo, encargado, ámbito y objetivo del plan, aviso de lo que le falta para salir en el impreso (objetivo, franja, día, número), botón **Enlazar actividad** (modal sobre `activities.events.attach`) y quitar del evento. Cuatro contadores de preparación (`EventController@mscReadiness`). |
+| Datos de prueba del formato MSC | ✅ | `database/seeders/MscDemoSeeder.php` (`php artisan db:seed --class=MscDemoSeeder`): plan Ranger 2025-2026 con los objetivos del primer y tercer trimestre, cinco actividades con franja y número, acampada de inauguración con 14 educandos y 4 responsables, y todo enlazado. Idempotente. |
+| Campos MSC de actividad ampliados (tipo, encargado, fecha, sitio, evaluación) | ✅ | `activities.activity_type/owner/scheduled_date/place/evaluation`; en los formularios de actividad y en su ficha. |
 
 ### 3.6 Inventario — ✅
 Controladores: `Inventory/*` · Páginas: `Pages/Inventory/*` · Rutas: `routes/features/inventory.php`
@@ -169,20 +174,31 @@ Controladores: `Portal/*` · Páginas: `Pages/Portal/*` · Layout: `PortalLayout
 | Ficha del hijo (`Portal/ChildController`) | ✅ | solo lectura |
 | Pagar online / declarar pago | ❌ descartado | El grupo cobra en efectivo (decisión 2026-09-06) |
 | Firmar autorizaciones desde el portal | ⬜ baja | El flujo por enlace de correo ya cubre la necesidad; solo si se ve que las familias con cuenta lo prefieren |
-| **Revisar datos del hijo** (teléfono, email, ficha médica) → propuesta a secretaría | ✅ | `Portal/Child` con formulario; crea `MemberChangeRequest`. Aprobación en `/revisiones-familias`. |
-| Confirmar continuidad de curso / responder campañas | ⬜ | siguiente slice de la Épica E |
+| **Revisar datos del hijo + campaña de inicio de curso** (datos, ficha médica, contacto familia, consentimientos, renovación de plaza) | ✅ | `Portal/Child` con formulario único; crea `MemberChangeRequest`. Aprobación en `/revisiones-familias`. Ver §3.1. |
 
 ### 3.10 Panel de inicio (gestión) — ✅
 `DashboardController` · `Pages/Dashboard.vue`
 
 - Prioriza **lo accionable**: `attention` (avisos con gravedad + enlace directo a donde se resuelve;
-  incluye "Revisiones de familias" pendientes), `tasks` (tareas de kraal asignadas a esta persona,
-  sin cerrar), `agenda`, `finance` (pendiente/cobrado/ratio), `inventory`, `members` (censo por rama).
+  incluye "Revisiones de familias" pendientes), **`week`** ("Tu semana": rejilla lun–dom con los
+  eventos de las ramas del usuario + tareas de kraal que vencen esta semana), `tasks` (tareas de
+  kraal sin cerrar), `agenda`, `finance` (pendiente/cobrado/ratio), `inventory`, `members`.
 - Avisos actuales: certificados de delitos sexuales por caducar, autorizaciones sin entregar del
   próximo evento, titulaciones por caducar, cuotas pendientes, documentos por caducar, préstamos
   fuera de plazo. Todo acotado a las ramas del usuario si es responsable.
 - **Ctrl+K** (`CommandPalette`): salto rápido a cualquier pantalla o acción.
 - `AppLayout`: barra lateral plegable (preferencia en `localStorage`), buscador y título de sección.
+
+### 3.11 Informes / cierre de curso — ✅
+Controlador: `Reports\AnnualReportController` · Servicio: `AnnualReportService` · Rutas: `routes/features/reports.php`
+
+| Elemento | Estado | Notas |
+|----------|--------|-------|
+| **Memoria del curso** (`/memoria` + `/memoria/pdf`) | ✅ | por `school_year`: objetivos por plan de rama (total/logrados/% y por ámbito), eventos realizados globales y por rama, asistencia media a reuniones, censo actual. `Pages/Reports/AnnualReport.vue` + `pdf/annual-report.blade.php`. Permiso `plans.view`; responsable acotado a sus ramas. |
+| **Censo oficial MSC** | ✅ | `MemberController@censusMsc` (ver §3.1). |
+| **Presupuesto vs. real** | ✅ | en el informe económico y en la ficha del presupuesto (ver §3.2). |
+| **Altas y bajas del curso** (retención) | ✅ | `AnnualReportService@retention`: altas por `joined_at`, bajas por `members.left_at` (columna nueva que mantiene sola `Member::booted`), + balance neto. En la página y el PDF de la memoria. |
+| Cargar contenido en la memoria (fotos destacadas, texto narrativo) | ⬜ | hoy es solo cuantitativa |
 
 ---
 

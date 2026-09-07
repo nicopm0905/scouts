@@ -9,6 +9,7 @@ use App\Models\Event;
 use App\Models\EventMember;
 use App\Models\User;
 use App\Services\Events\EventMaterialList;
+use App\Services\Events\MscOutingSheet;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
@@ -294,6 +295,22 @@ class EventPdfController extends Controller
         ]);
 
         return $pdf->stream(Str::slug($event->title).'-material.pdf');
+    }
+
+    /**
+     * Ficha de salida oficial de la delegación: datos de la salida, los tres
+     * ámbitos del plan de rama y la rejilla de estructura por día y franja.
+     */
+    public function mscOuting(Event $event, MscOutingSheet $sheets): Response
+    {
+        $this->authorize('view', $event);
+
+        $pdf = Pdf::loadView('pdf.event-msc-outing', [
+            'event' => $event,
+            'sheet' => $sheets->for($event),
+        ])->setPaper('a4');
+
+        return $pdf->stream(Str::slug($event->title).'-ficha-salida.pdf');
     }
 
     /** Exportar Dossier de Campamento/Evento */

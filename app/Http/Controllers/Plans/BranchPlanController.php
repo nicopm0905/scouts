@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Plans\StoreBranchPlanRequest;
 use App\Http\Requests\Plans\UpdateBranchPlanRequest;
 use App\Models\BranchPlan;
+use App\Support\MscPlanCatalog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -62,18 +63,33 @@ class BranchPlanController extends Controller
                 'completion_percentage' => $branchPlan->completionPercentage(),
                 'objectives' => $branchPlan->objectives->map(fn ($o) => [
                     'id' => $o->id,
+                    'scope' => $o->scope?->value,
+                    'scope_label' => $o->scope?->label(),
+                    'scope_classes' => $o->scope?->badgeClasses(),
+                    'line' => $o->line,
                     'development_area' => $o->development_area,
                     'content' => $o->content,
+                    'current_situation' => $o->current_situation,
+                    'goal_verb' => $o->goal_verb,
+                    'goal_complement' => $o->goal_complement,
+                    'evaluation' => $o->evaluation,
                     'description' => $o->description,
                     'term' => $o->term,
                     'status' => $o->status->value,
                     'status_label' => $o->status->label(),
                     'status_color' => $o->status->badgeColor(),
                     'position' => $o->position,
-                    'activities' => $o->activities->map(fn ($a) => ['id' => $a->id, 'title' => $a->title]),
+                    'activities' => $o->activities->map(fn ($a) => [
+                        'id' => $a->id,
+                        'title' => $a->title,
+                        'type_label' => $a->activity_type?->label(),
+                        'owner' => $a->owner,
+                        'date' => $a->scheduled_date?->format('d/m/y'),
+                    ]),
                 ]),
             ],
             'canManage' => auth()->user()->can('update', $branchPlan),
+            'catalog' => MscPlanCatalog::forFrontend(),
         ]);
     }
 

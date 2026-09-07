@@ -5,6 +5,8 @@ use App\Http\Controllers\Plans\ActivityObjectiveController;
 use App\Http\Controllers\Plans\ActivityScheduleController;
 use App\Http\Controllers\Plans\BranchPlanController;
 use App\Http\Controllers\Plans\BranchPlanObjectiveController;
+use App\Http\Controllers\Plans\BranchPlanPdfController;
+use App\Http\Controllers\Plans\BranchPlanScheduleController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -21,6 +23,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('branch-plans.objectives.update');
     Route::delete('branch-plan-objectives/{objective}', [BranchPlanObjectiveController::class, 'destroy'])
         ->name('branch-plans.objectives.destroy');
+
+    // Hoja de programación del trimestre en el formato MSC de la delegación.
+    Route::get('branch-plans/{branch_plan}/pdf/trimestre/{term}', [BranchPlanPdfController::class, 'term'])
+        ->whereNumber('term')
+        ->name('branch-plans.pdf.term');
+
+    // Generar el calendario del trimestre: reuniones semanales en bloque.
+    Route::post('branch-plans/{branch_plan}/reuniones', [BranchPlanScheduleController::class, 'store'])
+        ->name('branch-plans.meetings.store');
 
     Route::resource('activities', ActivityController::class);
     Route::post('activities/{activity}/duplicate', [ActivityController::class, 'duplicate'])

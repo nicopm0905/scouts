@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Plans;
 
 use App\Enums\MemberRole;
+use App\Models\BranchPlan;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -10,7 +11,7 @@ class StoreBranchPlanRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('create', \App\Models\BranchPlan::class);
+        return $this->user()->can('create', BranchPlan::class);
     }
 
     public function rules(): array

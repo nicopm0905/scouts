@@ -92,6 +92,18 @@ function unlinkObjective(objectiveId) {
     </PageHeader>
 
     <div class="mb-4 flex flex-wrap gap-4">
+        <div v-if="activity.activity_type_label" class="flex items-center gap-2 rounded-full bg-brand-50 px-3 py-1 text-sm font-semibold text-brand-700">
+            {{ activity.activity_type_label }}
+        </div>
+        <div v-if="activity.owner" class="flex items-center gap-2 rounded-full bg-ink-100 px-3 py-1 text-sm font-medium text-ink-700">
+            Encargado: {{ activity.owner }}
+        </div>
+        <div v-if="activity.scheduled_date" class="flex items-center gap-2 rounded-full bg-ink-100 px-3 py-1 text-sm font-medium text-ink-700">
+            Fecha: {{ activity.scheduled_date }}
+        </div>
+        <div v-if="activity.place" class="flex items-center gap-2 rounded-full bg-ink-100 px-3 py-1 text-sm font-medium text-ink-700">
+            Sitio: {{ activity.place }}
+        </div>
         <div v-if="activity.day_number" class="flex items-center gap-2 rounded-full bg-ink-100 px-3 py-1 text-sm font-medium text-ink-700">
             <svg class="h-4 w-4 text-ink-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z" /></svg>
             {{ activity.day_number }}
@@ -115,6 +127,10 @@ function unlinkObjective(objectiveId) {
             <div class="rounded-lg border border-ink-200 bg-white p-4">
                 <h3 class="mb-2 font-semibold text-ink-700">Desarrollo</h3>
                 <p class="whitespace-pre-line text-sm text-ink-600">{{ activity.development || 'Sin especificar.' }}</p>
+            </div>
+            <div v-if="activity.evaluation" class="rounded-lg border border-ink-200 bg-white p-4">
+                <h3 class="mb-2 font-semibold text-ink-700">Evaluación — ¿cómo ha salido?</h3>
+                <p class="whitespace-pre-line text-sm text-ink-600">{{ activity.evaluation }}</p>
             </div>
             <div v-if="activity.attachments.length" class="rounded-lg border border-ink-200 bg-white p-4">
                 <h3 class="mb-2 font-semibold text-ink-700">Adjuntos</h3>
@@ -149,35 +165,36 @@ function unlinkObjective(objectiveId) {
                     <li v-if="activity.events.length === 0" class="text-xs text-ink-400">Sin eventos programados.</li>
                 </ul>
                 <div v-if="canManage" class="flex gap-2">
-                    <select v-model="selectedEvent" class="flex-1 rounded-md border-ink-300 text-sm">
+                    <select v-model="selectedEvent" class="min-w-0 flex-1 rounded-md border-ink-300 text-sm">
                         <option value="">Elegir evento…</option>
                         <option v-for="e in availableEvents" :key="e.id" :value="e.id">{{ e.title }}</option>
                     </select>
-                    <button class="rounded-md bg-brand-600 px-3 py-1 text-sm text-white hover:bg-brand-700" @click="linkEvent">
+                    <button class="shrink-0 rounded-md bg-brand-600 px-3 py-1 text-sm text-white hover:bg-brand-700" @click="linkEvent">
                         Programar
                     </button>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <div class="rounded-lg border border-ink-200 bg-white p-4">
-                <h3 class="mb-2 font-semibold text-ink-700">Objetivos del plan vinculados</h3>
-                <ul class="mb-3 space-y-1 text-sm text-ink-600">
-                    <li v-for="o in activity.objectives" :key="o.id" class="flex items-center justify-between">
-                        <span>{{ o.plan_label }}: {{ o.description }}</span>
-                        <button v-if="canManage" class="text-xs text-red-600 hover:underline" @click="unlinkObjective(o.id)">Quitar</button>
-                    </li>
-                    <li v-if="activity.objectives.length === 0" class="text-xs text-ink-400">Sin vincular.</li>
-                </ul>
-                <div v-if="canManage" class="flex gap-2">
-                    <select v-model="selectedObjective" class="flex-1 rounded-md border-ink-300 text-sm">
-                        <option value="">Elegir objetivo…</option>
-                        <option v-for="o in availableObjectives" :key="o.id" :value="o.id">{{ o.label }}</option>
-                    </select>
-                    <button class="rounded-md bg-brand-600 px-3 py-1 text-sm text-white hover:bg-brand-700" @click="linkObjective">
-                        Vincular
-                    </button>
-                </div>
-            </div>
+    <!-- Objetivos del plan: a lo ancho para que quepan bien el texto y el selector -->
+    <div class="mt-4 rounded-lg border border-ink-200 bg-white p-4">
+        <h3 class="mb-2 font-semibold text-ink-700">Objetivos del plan vinculados</h3>
+        <ul class="mb-3 space-y-1 text-sm text-ink-600">
+            <li v-for="o in activity.objectives" :key="o.id" class="flex items-start justify-between gap-3">
+                <span class="min-w-0"><span class="font-medium text-ink-700">{{ o.plan_label }}:</span> {{ o.description }}</span>
+                <button v-if="canManage" class="shrink-0 text-xs text-red-600 hover:underline" @click="unlinkObjective(o.id)">Quitar</button>
+            </li>
+            <li v-if="activity.objectives.length === 0" class="text-xs text-ink-400">Sin vincular.</li>
+        </ul>
+        <div v-if="canManage" class="flex gap-2">
+            <select v-model="selectedObjective" class="min-w-0 flex-1 rounded-md border-ink-300 text-sm">
+                <option value="">Elegir objetivo…</option>
+                <option v-for="o in availableObjectives" :key="o.id" :value="o.id">{{ o.label }}</option>
+            </select>
+            <button class="shrink-0 rounded-md bg-brand-600 px-4 py-1 text-sm text-white hover:bg-brand-700" @click="linkObjective">
+                Vincular
+            </button>
         </div>
     </div>
 </template>

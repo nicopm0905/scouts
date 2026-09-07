@@ -96,59 +96,96 @@ Sin pago online ni conciliación (el grupo cobra en efectivo). Solo:
 
 ---
 
-## 3. Fase 4 — "Menos tecleo, más automático" (prioridad MEDIA)
+## 3. Fase 4 — "Menos tecleo, más automático" — ✅ COMPLETADA
 
-**En curso (2026-09-06):** Épica E arrancada (circuito "familia propone → secretaría aprueba → se
-aplica a la ficha"); Épica F: lista de material agregada de una salida ya hecha. Quedan
-renovación de plaza / consentimientos (E) y generar el calendario del trimestre desde el plan (F).
+**Estado (2026-09-07): Fase 4 COMPLETADA.** Épicas E, F y G cerradas. **Fase 5 APARCADA** por
+decisión del grupo (coste/beneficio no compensa para un grupo pequeño) — solo se hicieron los
+puntos baratos (vista "Tu semana", retención). Ver §4.
 
-### Épica E — Campaña de inicio de curso / revisión de datos
-- [x] **Formulario de datos del hijo revisable por la familia** (con aprobación de secretaría antes
-      de escribir en `Member`/`HealthRecord`, trazabilidad RGPD): `MemberChangeRequest` (columna
-      `payload`), `Portal\ChildController@submitReview` + formulario en `Portal/Child`, bandeja
-      `Members\ChangeRequestController` en `/revisiones-familias` (aprobar aplica; los campos
-      médicos solo si el revisor tiene `members.sensitive`), aviso en el dashboard. Alcance por
-      rama vía `MemberPolicy@update`.
-- [ ] **Renovación de plaza**: campaña anual que pide a cada familia confirmar continuidad
-      (reutilizará `MemberChangeRequest` o una tabla `enrollment_renewals`).
-- [ ] **Re-recogida de consentimientos** en lote al inicio de curso (reaprovecha `Signature`).
-- [ ] Permitir en el formulario del portal también los datos de contacto de la **familia**
-      (`Family.contact_phone/email`) — hoy solo se aceptan como texto en "Otra información".
-- **Hecho cuando:** el inicio de curso es "lanzar campaña y revisar respuestas", no reimportar un CSV.
+### Épica E — Campaña de inicio de curso / revisión de datos — ✅
+Todo el circuito vive en `MemberChangeRequest` (columna `payload`), `Portal\ChildController` y la
+bandeja `Members\ChangeRequestController` (`/revisiones-familias`, permiso `members.manage`, alcance
+por rama vía `MemberPolicy@update`, aviso en el dashboard). La familia, desde `Portal/Child`, en un
+solo formulario:
+- [x] **Datos del scout** (teléfono, email) y **ficha sanitaria** (alergias, intolerancias,
+      medicación, observaciones — solo se aplican si el revisor tiene `members.sensitive`).
+- [x] **Contacto de la familia** (`Family.contact_phone` / `contact_email`) — se aplica a la
+      familia vinculada a la cuenta que envía la revisión.
+- [x] **Consentimientos** (RGPD, imagen, salidas periódicas) con su texto legal: al aprobar se
+      hace `updateOrCreate` en `consents` con `signed_at` = hoy. Cubre la re-recogida de curso.
+- [x] **Renovación de plaza**: "¿continúa el curso {año}?" — si la familia responde **No**, al
+      aprobar el miembro pasa a `active = false`; si responde Sí, no se toca nada.
+- Secretaría ve el "antes → después" de todo (incluidos consentimientos y renovación) y aprueba o
+  rechaza con motivo.
+- **Hecho:** el inicio de curso es "que las familias revisen y respondan desde el portal, y
+  secretaría aprueba", sin reimportar CSV.
 
-### Épica F — Del plan de rama al calendario
+### Épica F — Del plan de rama al calendario — ✅
 - [x] **Lista de material agregada** de una salida: `App\Services\Events\EventMaterialList` suma las
       cantidades de `ActivityMaterial` de todas las actividades del evento (agrupando por ítem de
       inventario o, si no, por nombre) y cruza con la disponibilidad en las fechas del evento.
       PDF `events.pdf.materials` (`/eventos/{event}/pdf/material`), botón en `Events/Show` y enlace
       desde el paso "Material" del panel "Preparar salida". El **dossier** incluye ahora una tabla
       "Material total del evento".
-- [ ] **Generar los eventos del trimestre** desde el plan de rama / las actividades enlazadas
-      (fechas propuestas, tipo, ramas), revisables antes de crear.
-- [~] **Ficha de sesión imprimible del día**: el guion sale en el **dossier** (por actividad) y el
-      material agregado ya está resuelto; falta, si se pide, una hoja ligera de una sola reunión.
+- [x] **Generar los eventos del trimestre** desde el plan de rama: `BranchPlanScheduleController@store`
+      (`POST /branch-plans/{plan}/reuniones`) crea en bloque las reuniones semanales de un tramo de
+      fechas (día y hora fijos) para la rama del plan; no duplica reuniones ya existentes ese día y
+      respeta `skip_dates`. Modal en `BranchPlans/Show` con vista previa de las fechas antes de crear.
+- [x] ~~Ficha de sesión imprimible del día (guion)~~ — **retirada el 2026-09-07**: la ficha de salida
+      MSC cubre lo mismo con el formato oficial, así que el guion no aportaba nada. El dossier sigue
+      siendo la versión completa.
+- [x] **Formato oficial MSC del plan de rama y de la salida** (2026-09-07): los objetivos se rellenan
+      con el catálogo de la delegación (Ámbito → Línea → Contenido, `App\Support\MscPlanCatalog`),
+      el diagnóstico "¿cómo estamos?", el objetivo en verbo + complemento y la evaluación
+      "¿cómo ha salido?". Dos impresos nuevos: **hoja de programación trimestral**
+      (`branch-plans.pdf.term`) y **ficha de salida de la delegación** (`events.pdf.msc-outing`),
+      con la rejilla ESTRUCTURA por día y franja horaria.
 
-### Épica G — Cierre de curso
-- [ ] **Exportación del censo oficial MSC** en el formato que pide la federación (mapear campos de
-      `Member`/`Family`/`LeaderProfile`). Ahorra horas a secretaría una vez al año.
-- [ ] **Memoria anual**: generador que junta eventos realizados, asistencia media por rama,
-      actividades por objetivo del plan y fotos destacadas → PDF.
-- [ ] **Presupuesto vs. real**: cerrar el círculo `Budget`/`BudgetItem` ↔ `Invoice`/`Charge` en el
-      informe económico y por evento.
+### Épica G — Cierre de curso — ✅
+- [x] **Exportación del censo MSC** (`MemberController@censusMsc`, `/members/censo-msc`): una fila
+      por persona con sección, cargo (educando/scouter), datos identificativos (`dni`/`sex`/`address`
+      nuevos en `members`), contacto y, para el kraal, titulación y certificado de delitos sexuales.
+      Botón en `Members/Index`. *(Pendiente de ajustar el orden/nombres de columnas al fichero exacto
+      de la federación cuando lo faciliten.)*
+- [x] **Memoria del curso**: `AnnualReportService` + `Reports\AnnualReportController` (`/memoria` y
+      `/memoria/pdf`): por curso escolar, progreso de objetivos por plan de rama (total/logrados/%
+      y por ámbito de desarrollo), eventos realizados (globales y por rama), asistencia media a
+      reuniones y censo actual. Página con selector de curso + PDF. Alcance por rama.
+- [x] **Presupuesto vs. real**: `Budget::summary()` (previsto/real/desvío del balance). El informe
+      económico (`FinanceReportService`/`Finance/Report.vue`) lista cada presupuesto de evento del
+      periodo con su desvío y lo incluye en el CSV. La ficha del presupuesto muestra el desvío.
 
 ---
 
-## 4. Fase 5 / backlog (prioridad BAJA — hacer solo si sobra tiempo o lo pide el grupo)
+## 4. Fase 5 / backlog — APARCADA (decisión del grupo, 2026-09-07)
 
-- [ ] **PWA instalable** + asistencia offline (pasar lista sin cobertura en el bosque, sincroniza al
-      volver).
-- [ ] Vista "Mi semana" para el responsable en el dashboard (sus reuniones, tareas asignadas,
-      cobros de su rama).
-- [ ] Integración de calendario bidireccional (hoy iCal es solo lectura).
-- [ ] Firma con trazo/imagen además de la confirmación por token.
-- [ ] Métricas de retención de scouts / alertas de bajas.
-- [ ] App de familia como PWA con notificaciones push.
-- [ ] Multi-grupo / multi-tenant (solo si se plantea ceder la plataforma a otros grupos).
+**Decisión:** no se abordan estas mejoras por ahora. El grupo es pequeño y sin ánimo de lucro; el
+coste (todas son 800 €+ y varias > 2.000 €, o semanas de trabajo si lo hace el propio grupo) no
+compensa el ahorro de tiempo que darían. La plataforma **ya cubre los trabajos recurrentes del
+curso** (Fases 3 y 4 completas). Retomar un punto concreto solo si aparece una necesidad real y
+recurrente que lo justifique; el análisis de coste/beneficio de cada uno está más abajo para no
+rehacerlo.
+
+**Ya hecho de esta fase** (eran baratos o ya existían):
+- [x] **Vista "Tu semana"** en el panel de inicio: rejilla lun–dom con los eventos de las ramas del
+      usuario y las tareas de kraal que vencen esa semana. `DashboardController@thisWeek`.
+- [x] **Firma con trazo/imagen** — ya estaba en `Public/Signature` y `Public/Enrollment`
+      ("Paso 3: Firma Táctil"). El punto figuraba por despiste.
+- [x] **Métricas de retención / bajas** — columna `left_at` en `members` + bloque "Altas y bajas
+      del curso" en la memoria (`AnnualReportService@retention`).
+
+**Aparcado, con su coste/beneficio ya analizado (2026-09-07):**
+
+| Mejora | Problema que resuelve | Frecuencia del dolor | Esfuerzo | Coste (35–50 €/h) | Veredicto |
+|--------|-----------------------|----------------------|----------|-------------------|-----------|
+| PWA instalable + notificaciones push | Un aviso llega aunque no abras la app/correo | Semanal | 5–7 días | 1.050–2.100 € | Mejor valor/esfuerzo, pero solapa con WhatsApp |
+| Asistencia offline | Pasar lista en campamento sin cobertura | Mensual (solo salidas sin wifi) | 7–11 días | 1.470–3.300 € | Alternativa de coste 0: papel + teclear al volver |
+| Calendario bidireccional (Google 2 vías) | Crear eventos desde tu Google y que lleguen a la plataforma | Rara (los eventos se meten 1 vez en la plataforma) | 8–12 días | 1.680–3.600 € | Descartar — el iCal de solo lectura ya cubre el 90 % |
+| Multi-grupo / multi-tenant | Ceder la plataforma a otros grupos | Nunca para este grupo | 18–30 días | 3.780–9.000 € | Solo con compromiso firme de 2+ grupos; riesgo RGPD alto |
+
+**Extras baratos** que quedaron sueltos, por si alguna vez entran: recibo individual en PDF para la
+familia (~½ día), hoja médica en pantalla para el móvil sin PDF (~½ día), circular del evento con
+diseño de marca (~1,5–2 días, solo si se decide usarla).
 
 ---
 

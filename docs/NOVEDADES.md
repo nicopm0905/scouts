@@ -81,12 +81,10 @@ en el panel de inicio → **Personas → Revisiones de familias** (`/revisiones-
 - Eliges tramo de fechas, día de la semana, hora y duración → **vista previa** de las fechas → crea
   todas las reuniones semanales de golpe (no duplica las que ya existan).
 
-### 8. Lista de material y guion de sesión  *(Épica F)*
+### 8. Lista de material  *(Épica F)*
 **Dónde:** ficha de la acampada de prueba.
 - **"Lista de material (PDF)"** (columna Documentos): suma el material de todas las actividades del
   evento, agrupado, y marca lo que **no llega** en esas fechas según el inventario.
-- **"Guion (PDF)"** (junto al título "Cronograma del Evento"): el guion de las actividades del día
-  en una hoja (objetivos + desarrollo + material).
 - El **dossier** ahora incluye además una tabla "Material total del evento".
 
 ### 9. Memoria del curso  *(Épica G)*

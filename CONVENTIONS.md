@@ -62,6 +62,22 @@ tests/
 - Casts de enums declarados en `$casts`. Relaciones tipadas con return types.
 - No romper relaciones existentes. Añadir relaciones nuevas es libre.
 
+## 6bis. Formato MSC (plan de rama, actividades y salidas)
+- El plan de rama y la ficha de salida siguen el **impreso de la Delegación Diocesana del MSC**.
+  No inventes campos ni etiquetas: si algo va al papel, tiene que llamarse como en el impreso.
+- El catálogo oficial **Ámbito → Línea → Contenido** vive en `App\Support\MscPlanCatalog`
+  (con los verbos de objetivo y las franjas horarias). Está en código, no en base de datos, porque
+  lo fija la federación. `forFrontend()` es lo que consumen los desplegables encadenados.
+- Un objetivo se redacta como en el impreso: verbo + complemento. `BranchPlanObjective::goalText()`
+  es la forma correcta de leerlo; `description` guarda la frase compuesta por compatibilidad.
+- `activities.time_slot` guarda las **claves** del catálogo (`manana`, `tarde_1`, `tarde_2`,
+  `noche`), no la etiqueta visible. Usa `MscPlanCatalog::timeSlotLabel()` para pintarla.
+- Los impresos se arman en servicios (`Plans\TermPlanSheet`, `Events\MscOutingSheet`) y se pintan
+  en blades bajo `resources/views/pdf/`. La vista no consulta la base de datos.
+- El membrete oficial (logo, sellos, texto legal vertical y pie de la delegación) es el parcial
+  `pdf/partials/msc-letterhead`. Inclúyelo en cualquier PDF que vaya a papel y reserva el hueco en
+  `@page`: ~53mm arriba, 28mm a la izquierda y 15mm abajo. En apaisado pásale `['mscLandscape' => true]`.
+
 ## 7. Frontend (Vue 3 + Inertia)
 - Componentes compartidos en `resources/js/Components/Shared/`: **úsalos, no los dupliques**.
   Son el sistema de diseño de la plataforma; si escribes marcado propio, la pantalla se sale del estilo común.

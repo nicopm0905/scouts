@@ -8,6 +8,8 @@ use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Events\StoreEventRequest;
 use App\Http\Requests\Events\UpdateEventRequest;
+use App\Models\Activity;
+use App\Models\BranchPlanObjective;
 use App\Models\Event;
 use App\Models\EventMember;
 use App\Models\Member;
@@ -16,6 +18,7 @@ use App\Services\CampRatio\CampRatioValidator;
 use App\Services\Drive\DriveServiceInterface;
 use App\Services\Drive\DriveStructureService;
 use App\Services\Inventory\InventoryAvailabilityService;
+use App\Support\MscPlanCatalog;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -108,6 +111,7 @@ class EventController extends Controller
         $event->load([
             'checklistItems' => fn ($q) => $q->orderBy('position')->with('assignee:id,name'),
             'activities' => fn ($q) => $q->orderBy('day_number')->orderBy('time_slot')->orderBy('activity_number'),
+            'activities.objectives',
         ]);
 
         // El enlace público de inscripción (token por familia) solo se expone
@@ -169,14 +173,11 @@ class EventController extends Controller
                     ->values()
                 : [],
             'charges' => $event->charges()->latest()->get(['id', 'title', 'amount', 'due_date', 'type']),
-            'activities' => $event->activities->map(fn ($a) => [
-                'id' => $a->id,
-                'title' => $a->title,
-                'day_number' => $a->day_number,
-                'time_slot' => $a->time_slot,
-                'activity_number' => $a->activity_number,
-                'duration_minutes' => $a->duration_minutes,
-            ]),
+            'activities' => $event->activities->map(fn (Activity $a) => $this->activityRow($a)),
+            // Para el botón "Enlazar actividad" de la ficha del evento.
+            'availableActivities' => $canUpdate ? $this->linkableActivities($event) : [],
+            // Qué le falta a la ficha de salida MSC para salir completa.
+            'mscReadiness' => $canUpdate ? $this->mscReadiness($event) : null,
             'campRatio' => $campRatio,
             'preparation' => ($canUpdate && $event->requiresEnrollment())
                 ? $this->preparationSteps($event, $campRatio, $enrollments)
@@ -196,6 +197,86 @@ class EventController extends Controller
      * @param  Collection<int,array<string,mixed>>  $enrollments
      * @return array{ready:int,total:int,steps:array<int,array<string,mixed>>}
      */
+    /**
+     * Una actividad del evento tal y como se ve en el cronograma: con el ámbito
+     * y el objetivo del plan de rama que trabaja, y con lo que le falta para
+     * salir en la ficha de salida MSC.
+     */
+    private function activityRow(Activity $activity): array
+    {
+        $objectives = $activity->relationLoaded('objectives')
+            ? $activity->objectives
+            : collect();
+
+        return [
+            'id' => $activity->id,
+            'title' => $activity->title,
+            'day_number' => $activity->day_number,
+            'time_slot' => $activity->time_slot,
+            'time_slot_label' => MscPlanCatalog::timeSlotLabel($activity->time_slot),
+            'activity_number' => $activity->activity_number,
+            'duration_minutes' => $activity->duration_minutes,
+            'type_label' => $activity->activity_type?->label(),
+            'owner' => $activity->owner,
+            'objectives' => $objectives->map(fn (BranchPlanObjective $o) => [
+                'id' => $o->id,
+                'scope_label' => $o->scope?->label(),
+                'scope_classes' => $o->scope?->badgeClasses(),
+                'content' => $o->content,
+                'goal' => $o->goalText(),
+            ])->values(),
+            // Avisos concretos: sin esto la ficha sale incompleta.
+            'missing' => array_values(array_filter([
+                $objectives->isEmpty() ? 'objetivo del plan de rama' : null,
+                blank($activity->time_slot) ? 'franja horaria' : null,
+                blank($activity->day_number) ? 'día' : null,
+                $activity->activity_number === null ? 'número' : null,
+            ])),
+        ];
+    }
+
+    /** Actividades de la biblioteca que aún no están en este evento. */
+    private function linkableActivities(Event $event): array
+    {
+        return Activity::query()
+            ->whereDoesntHave('events', fn ($q) => $q->where('events.id', $event->id))
+            ->when($event->branches, function ($q) use ($event) {
+                // Las de las ramas del evento y las que sirven para cualquier rama.
+                $q->where(fn ($sub) => $sub->whereIn('branch', $event->branches)->orWhereNull('branch'));
+            })
+            ->orderBy('title')
+            ->get(['id', 'title', 'branch', 'activity_number'])
+            ->map(fn (Activity $a) => [
+                'id' => $a->id,
+                'title' => $a->title,
+                'branch_label' => $a->branch ? MemberRole::from($a->branch)->label() : 'Todas',
+            ])
+            ->all();
+    }
+
+    /** Resumen de si la ficha de salida MSC saldrá completa. */
+    private function mscReadiness(Event $event): array
+    {
+        $activities = $event->activities;
+
+        $withObjective = $activities->filter(
+            fn (Activity $a) => $a->relationLoaded('objectives') && $a->objectives->isNotEmpty()
+        );
+
+        $scopes = $withObjective
+            ->flatMap(fn (Activity $a) => $a->objectives->pluck('scope'))
+            ->filter()
+            ->unique()
+            ->count();
+
+        return [
+            'activities' => $activities->count(),
+            'with_objective' => $withObjective->count(),
+            'without_slot' => $activities->filter(fn (Activity $a) => blank($a->time_slot))->count(),
+            'scopes_covered' => $scopes,
+        ];
+    }
+
     private function preparationSteps(Event $event, ?array $campRatio, $enrollments): array
     {
         $enrolled = $enrollments->where('enrolled', true);
