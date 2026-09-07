@@ -15,6 +15,7 @@ use App\Models\LeaderProfile;
 use App\Models\LeaderTraining;
 use App\Models\Member;
 use App\Models\MemberChangeRequest;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -33,6 +34,7 @@ class DashboardController extends Controller
 
         return Inertia::render('Dashboard', [
             'attention' => $this->attention($user, $branches),
+            'week' => $this->thisWeek($user, $branches),
             'agenda' => $this->agenda($branches),
             'tasks' => $this->myTasks($user),
             'finance' => $this->finance($user, $branches),
@@ -40,6 +42,55 @@ class DashboardController extends Controller
             'members' => $this->memberBreakdown($user),
             'today' => ucfirst(now()->locale('es')->isoFormat('dddd, D [de] MMMM')),
         ]);
+    }
+
+    /**
+     * "Tu semana": los 7 días de la semana en curso con los eventos de las ramas
+     * del usuario y cuántas tareas de kraal le vencen antes del domingo.
+     *
+     * @param  array<int,string>|null  $branches  null = todas las ramas
+     * @return array<string, mixed>
+     */
+    private function thisWeek($user, ?array $branches): array
+    {
+        $start = now()->startOfWeek(Carbon::MONDAY);
+        $end = now()->endOfWeek(Carbon::SUNDAY);
+
+        $events = Event::query()
+            ->whereBetween('start_at', [$start, $end])
+            ->when($branches, fn ($q) => $this->filterEventBranches($q, $branches))
+            ->orderBy('start_at')
+            ->get(['id', 'title', 'type', 'start_at', 'branches'])
+            ->map(fn (Event $e) => [
+                'id' => $e->id,
+                'title' => $e->title,
+                'type' => $e->type->label(),
+                'type_key' => $e->type->value,
+                'weekday' => (int) $e->start_at->isoWeekday(), // 1 = lunes … 7 = domingo
+                'time' => $e->start_at->format('H:i'),
+                'href' => route('events.show', $e->id),
+            ])
+            ->all();
+
+        $tasksDue = $user->can('events.view')
+            ? EventChecklistItem::query()
+                ->where('assigned_to', $user->id)
+                ->where('done', false)
+                ->whereNotNull('due_at')
+                ->where('due_at', '<=', $end)
+                ->count()
+            : 0;
+
+        return [
+            'from' => $start->toDateString(),
+            'to' => $end->toDateString(),
+            'range_label' => $start->isoFormat('D')
+                .($start->month === $end->month ? '' : ' '.$start->isoFormat('MMM'))
+                .' – '.$end->isoFormat('D MMM'),
+            'today_weekday' => (int) now()->isoWeekday(),
+            'events' => $events,
+            'tasks_due' => $tasksDue,
+        ];
     }
 
     /**

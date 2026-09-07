@@ -3,6 +3,7 @@
 namespace App\Services\Finance;
 
 use App\Enums\ChargeStatus;
+use App\Models\Budget;
 use App\Models\ChargeMember;
 use App\Models\Invoice;
 use Carbon\Carbon;
@@ -79,7 +80,36 @@ class FinanceReportService
             'total_expense' => $totalExpense,
             'balance' => round($totalIncome - $totalExpense, 2),
             'monthly' => $this->monthlySeries($from, $to, $paidCharges, $issuedInvoices, $receivedInvoices),
+            'budgets' => $this->budgetComparison($from, $to),
         ];
+    }
+
+    /**
+     * Presupuesto vs. real de los eventos cuyo presupuesto cae en el periodo
+     * (por la fecha del evento asociado).
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function budgetComparison(Carbon $from, Carbon $to): array
+    {
+        return Budget::query()
+            ->with(['items.invoices', 'event:id,title,start_at'])
+            ->whereHas('event', fn ($q) => $q->whereBetween('start_at', [$from, $to]))
+            ->get()
+            ->map(function (Budget $budget) {
+                $s = $budget->summary();
+
+                return [
+                    'id' => $budget->id,
+                    'name' => $budget->name,
+                    'event' => $budget->event?->title,
+                    'status' => $budget->status->value,
+                    ...$s,
+                ];
+            })
+            ->sortBy('event')
+            ->values()
+            ->all();
     }
 
     /**
@@ -131,6 +161,19 @@ class FinanceReportService
         $rows[] = ['Total ingresos', '', '', number_format($report['total_income'], 2, '.', '')];
         $rows[] = ['Total gastos', '', '', number_format($report['total_expense'], 2, '.', '')];
         $rows[] = ['Balance', '', '', number_format($report['balance'], 2, '.', '')];
+
+        if (! empty($report['budgets'])) {
+            $rows[] = [];
+            $rows[] = ['Presupuesto vs real', 'Balance previsto', 'Balance real', 'Desvío'];
+            foreach ($report['budgets'] as $b) {
+                $rows[] = [
+                    $b['event'] ?? $b['name'],
+                    number_format($b['expected_balance'], 2, '.', ''),
+                    number_format($b['real_balance'], 2, '.', ''),
+                    number_format($b['variance'], 2, '.', ''),
+                ];
+            }
+        }
 
         return $rows;
     }

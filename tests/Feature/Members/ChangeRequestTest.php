@@ -121,3 +121,45 @@ it('el panel de secretaría muestra las revisiones pendientes', function () {
         ->assertOk()
         ->assertInertia(fn ($page) => $page->component('Members/ChangeRequests/Index')->has('requests', 1));
 });
+
+it('aplica datos de familia, consentimientos y baja de renovación al aprobar', function () {
+    [$account, $child] = familiaConScout();
+    $secretaria = userWithRole('secretaria');
+
+    // La familia envía la revisión desde el portal.
+    $this->actingAs($account)->post("/portal/scouts/{$child->id}/revision", [
+        'family' => ['contact_phone' => '655111222', 'contact_email' => 'nueva@familia.test'],
+        'consents' => ['imagen' => true, 'rgpd' => true, 'salidas_periodicas' => false],
+        'renewal_continues' => false,
+    ])->assertRedirect();
+
+    $req = MemberChangeRequest::first();
+    expect($req->payload['family']['contact_phone'])->toBe('655111222')
+        ->and($req->payload['consents']['imagen'])->toBeTrue()
+        ->and($req->payload['renewal']['continues'])->toBeFalse();
+
+    // Secretaría aprueba.
+    $this->actingAs($secretaria)->post(route('member-change-requests.approve', $req))->assertRedirect();
+
+    $family = $child->families()->first();
+    expect($family->contact_phone)->toBe('655111222')
+        ->and($family->contact_email)->toBe('nueva@familia.test')
+        ->and($child->fresh()->active)->toBeFalse()
+        ->and($child->consents()->where('type', 'imagen')->first()->granted)->toBeTrue()
+        ->and($child->consents()->where('type', 'salidas_periodicas')->first()->granted)->toBeFalse();
+});
+
+it('renovar confirmando continuidad no da de baja al scout', function () {
+    [$account, $child] = familiaConScout();
+    $secretaria = userWithRole('secretaria');
+
+    $this->actingAs($account)->post("/portal/scouts/{$child->id}/revision", [
+        'renewal_continues' => true,
+        'consents' => ['rgpd' => true],
+    ])->assertRedirect();
+
+    $req = MemberChangeRequest::first();
+    $this->actingAs($secretaria)->post(route('member-change-requests.approve', $req))->assertRedirect();
+
+    expect($child->fresh()->active)->toBeTrue();
+});

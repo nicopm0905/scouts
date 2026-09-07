@@ -7,6 +7,7 @@ use App\Models\Event;
 use App\Models\LeaderProfile;
 use App\Models\LeaderTraining;
 use App\Models\Member;
+use Carbon\Carbon;
 use Illuminate\Testing\TestResponse;
 
 /**
@@ -147,4 +148,23 @@ it('la tesorería del panel resume lo pendiente y lo cobrado', function () {
             ->where('finance.paid_ratio', 60)
             ->where('finance.pending_count', 1)
         );
+});
+
+it('"Tu semana" trae los eventos de la semana en curso de las ramas del usuario', function () {
+    $user = userWithRole('responsable', [MemberRole::Lobato->value]);
+
+    $estaSemana = Event::factory()->create([
+        'title' => 'Reunión de esta semana',
+        'start_at' => now()->startOfWeek(Carbon::MONDAY)->addDays(2)->setTime(17, 30),
+        'branches' => [MemberRole::Lobato->value],
+    ]);
+    // Fuera de la semana o de otra rama: no deben salir.
+    Event::factory()->create(['start_at' => now()->addWeeks(2), 'branches' => [MemberRole::Lobato->value]]);
+    Event::factory()->create(['start_at' => now()->addDay(), 'branches' => [MemberRole::Pionero->value]]);
+
+    $this->actingAs($user)->get(route('dashboard'))
+        ->assertInertia(fn ($page) => $page
+            ->has('week.events', 1)
+            ->where('week.events.0.id', $estaSemana->id)
+            ->where('week.events.0.weekday', 3));
 });

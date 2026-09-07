@@ -10,6 +10,7 @@ import ConfirmButton from '@/Components/Shared/ConfirmButton.vue';
 
 const props = defineProps({
     budget: Object,
+    comparison: { type: Object, default: () => ({ variance: 0, expected_balance: 0, real_balance: 0 }) },
 });
 
 const { can } = useAuth();
@@ -104,6 +105,21 @@ const inp = 'w-full bg-transparent border-transparent hover:bg-slate-50 focus:bg
                 </div>
             </template>
         </PageHeader>
+
+        <!-- Desvío del balance -->
+        <div v-if="budget.status !== 'draft'" class="mb-4 flex items-center justify-between rounded-xl border p-4"
+            :class="comparison.variance < 0 ? 'border-rose-200 bg-rose-50/60' : 'border-emerald-200 bg-emerald-50/60'">
+            <div class="text-sm text-slate-600">
+                Balance previsto <b>{{ formatCurrency(comparison.expected_balance) }}</b>
+                · real <b>{{ formatCurrency(comparison.real_balance) }}</b>
+            </div>
+            <div class="text-right">
+                <p class="text-xs font-medium text-slate-500">Desvío</p>
+                <p class="text-xl font-bold" :class="comparison.variance < 0 ? 'text-rose-600' : 'text-emerald-600'">
+                    {{ comparison.variance > 0 ? '+' : '' }}{{ formatCurrency(comparison.variance) }}
+                </p>
+            </div>
+        </div>
 
         <!-- Resumen -->
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-8">

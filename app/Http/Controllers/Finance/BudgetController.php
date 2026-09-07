@@ -19,6 +19,7 @@ class BudgetController extends Controller
 
         return Inertia::render('Budgets/Show', [
             'budget' => $budget,
+            'comparison' => $budget->summary(),
         ]);
     }
 

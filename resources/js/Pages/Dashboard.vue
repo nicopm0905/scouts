@@ -8,6 +8,7 @@ import { useAuth } from '@/composables/useAuth'
 
 const props = defineProps({
     attention: { type: Array, default: () => [] },
+    week: { type: Object, default: null },
     agenda: { type: Array, default: () => [] },
     tasks: { type: Array, default: () => [] },
     finance: { type: Object, default: null },
@@ -15,6 +16,24 @@ const props = defineProps({
     members: { type: Object, default: null },
     today: { type: String, default: '' },
 })
+
+// "Tu semana": rejilla de 7 días con los eventos de cada uno.
+const weekDays = computed(() => {
+    const nombres = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
+    const from = props.week ? new Date(`${props.week.from}T00:00:00`) : null
+    return nombres.map((label, i) => {
+        const d = from ? new Date(from) : null
+        if (d) d.setDate(d.getDate() + i)
+        return {
+            label,
+            iso: i + 1,
+            dayNum: d ? d.getDate() : null,
+            isToday: props.week?.today_weekday === i + 1,
+            events: (props.week?.events ?? []).filter((e) => e.weekday === i + 1),
+        }
+    })
+})
+const weekHasContent = computed(() => (props.week?.events?.length ?? 0) > 0 || (props.week?.tasks_due ?? 0) > 0)
 
 const { user, can } = useAuth()
 
@@ -233,6 +252,34 @@ const euros = (n) =>
                         </Link>
                     </li>
                 </ul>
+            </section>
+
+            <!-- ═══ Tu semana ═══ -->
+            <section v-if="week && weekHasContent" aria-labelledby="titulo-semana">
+                <div class="flex items-baseline justify-between">
+                    <h2 id="titulo-semana" class="text-sm font-bold uppercase tracking-wide text-slate-500">Tu semana</h2>
+                    <span class="text-xs font-medium text-slate-400">
+                        {{ week.range_label }}<template v-if="week.tasks_due"> · {{ week.tasks_due }} {{ week.tasks_due === 1 ? 'tarea vence' : 'tareas vencen' }} esta semana</template>
+                    </span>
+                </div>
+                <div class="mt-3 grid grid-cols-7 gap-1.5 overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-2xs">
+                    <div v-for="d in weekDays" :key="d.iso"
+                        class="min-h-[76px] rounded-xl p-1.5 text-center"
+                        :class="d.isToday ? 'bg-brand-50 ring-1 ring-brand-200' : 'bg-slate-50/60'">
+                        <p class="text-[11px] font-bold uppercase" :class="d.isToday ? 'text-brand-700' : 'text-slate-400'">
+                            {{ d.label }}<span v-if="d.dayNum" class="ml-0.5 font-semibold text-slate-500">{{ d.dayNum }}</span>
+                        </p>
+                        <ul class="mt-1 space-y-1">
+                            <li v-for="e in d.events" :key="e.id">
+                                <Link :href="e.href"
+                                    class="block truncate rounded-md bg-white px-1.5 py-1 text-[11px] font-semibold text-slate-700 shadow-2xs hover:bg-brand-50 hover:text-brand-700"
+                                    :title="`${e.time} · ${e.title} (${e.type})`">
+                                    {{ e.time }} {{ e.title }}
+                                </Link>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </section>
 
             <!-- ═══ Mis tareas del kraal (reparto de preparación de salidas) ═══ -->

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Members;
 
 use App\Enums\ChangeRequestStatus;
+use App\Enums\ConsentType;
 use App\Http\Controllers\Controller;
 use App\Models\Member;
 use App\Models\MemberChangeRequest;
@@ -28,7 +29,7 @@ class ChangeRequestController extends Controller
 
         $requests = MemberChangeRequest::query()
             ->whereIn('member_id', $visibleMemberIds)
-            ->with(['member:id,first_name,last_name,role', 'submitter:id,name', 'reviewer:id,name'])
+            ->with(['member:id,first_name,last_name,role', 'member.healthRecord', 'member.families', 'member.consents', 'submitter:id,name', 'reviewer:id,name'])
             ->orderByRaw("case when status = 'pending' then 0 else 1 end")
             ->latest()
             ->limit(100)
@@ -92,11 +93,14 @@ class ChangeRequestController extends Controller
             'health.intolerances' => 'Intolerancias',
             'health.medication' => 'Medicación',
             'health.observations' => 'Observaciones médicas',
+            'family.contact_phone' => 'Teléfono de la familia',
+            'family.contact_email' => 'Email de la familia',
         ];
 
         $canSensitive = auth()->user()->can('members.sensitive');
         $member = $r->member;
         $health = $member?->healthRecord;
+        $family = $member?->families->first();
         $rows = [];
 
         foreach (MemberChangeRequest::editableFields() as $group => $fields) {
@@ -106,7 +110,12 @@ class ChangeRequestController extends Controller
                 }
 
                 $hidden = $group === 'health' && ! $canSensitive;
-                $current = $group === 'member' ? $member?->{$field} : $health?->{$field};
+                $current = match ($group) {
+                    'member' => $member?->{$field},
+                    'health' => $health?->{$field},
+                    'family' => $family?->{$field},
+                    default => null,
+                };
 
                 $rows[] = [
                     'group' => $group,
@@ -117,6 +126,35 @@ class ChangeRequestController extends Controller
                     'hidden' => $hidden,
                 ];
             }
+        }
+
+        // Consentimientos.
+        $consentByType = $member?->consents->keyBy(fn ($c) => $c->type->value) ?? collect();
+        foreach ($r->payload['consents'] ?? [] as $type => $granted) {
+            $enum = ConsentType::tryFrom($type);
+            if (! $enum) {
+                continue;
+            }
+            $rows[] = [
+                'group' => 'consent',
+                'field' => $type,
+                'label' => 'Consentimiento: '.$enum->label(),
+                'current' => ($consentByType[$type]->granted ?? false) ? 'Sí' : 'No',
+                'proposed' => $granted ? 'Sí' : 'No',
+                'hidden' => false,
+            ];
+        }
+
+        // Renovación de plaza.
+        if (isset($r->payload['renewal']['continues'])) {
+            $rows[] = [
+                'group' => 'renewal',
+                'field' => 'continues',
+                'label' => 'Continúa el curso '.($r->payload['renewal']['school_year'] ?? ''),
+                'current' => $member?->active ? 'Activo' : 'Baja',
+                'proposed' => $r->payload['renewal']['continues'] ? 'Sí continúa' : 'No continúa (baja)',
+                'hidden' => false,
+            ];
         }
 
         return $rows;

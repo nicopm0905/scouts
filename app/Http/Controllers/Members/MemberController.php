@@ -88,6 +88,67 @@ class MemberController extends Controller
         ]);
     }
 
+    /**
+     * Censo oficial MSC: una fila por persona con los campos que pide la
+     * federación (sección, cargo, datos identificativos, contacto y, para el
+     * kraal, titulación y certificado de delitos sexuales).
+     */
+    public function censusMsc(Request $request): HttpResponse
+    {
+        Gate::authorize('viewAny', Member::class);
+
+        $members = Member::query()
+            ->visibleTo($request->user())
+            ->with(['families', 'leaderProfile'])
+            ->orderBy('role')
+            ->orderBy('last_name')
+            ->orderBy('first_name')
+            ->get();
+
+        $sexo = ['M' => 'Hombre', 'F' => 'Mujer', 'X' => 'Otro'];
+
+        $handle = fopen('php://temp', 'r+');
+        fputcsv($handle, [
+            'seccion', 'cargo', 'apellidos', 'nombre', 'dni', 'sexo', 'fecha_nacimiento',
+            'direccion', 'telefono', 'email', 'fecha_alta', 'activo',
+            'titulacion', 'cert_delitos_sexuales', 'cert_vigente', 'cert_caduca',
+        ]);
+
+        foreach ($members as $member) {
+            $family = $member->families->first();
+            $isLeader = $member->isLeader();
+            $profile = $member->leaderProfile;
+
+            fputcsv($handle, [
+                $member->role->label(),
+                $isLeader ? 'Scouter / Responsable' : 'Educando',
+                $member->last_name,
+                $member->first_name,
+                $member->dni,
+                $sexo[$member->sex] ?? '',
+                $member->birth_date?->toDateString(),
+                $member->address,
+                $family?->contact_phone ?? $member->phone,
+                $family?->contact_email ?? $member->email,
+                $member->joined_at?->toDateString(),
+                $member->active ? 'si' : 'no',
+                $isLeader ? ($profile?->qualification?->label() ?? '') : '',
+                $isLeader ? ($profile?->sexual_offenses_certificate_date ? 'si' : 'no') : '',
+                $isLeader ? ($profile?->hasValidSexualOffensesCertificate() ? 'si' : 'no') : '',
+                $isLeader ? $profile?->sexual_offenses_certificate_expires_at?->toDateString() : '',
+            ]);
+        }
+
+        rewind($handle);
+        $csv = stream_get_contents($handle);
+        fclose($handle);
+
+        return response("\xEF\xBB\xBF".$csv, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="censo_msc_'.now()->format('Y-m-d').'.csv"',
+        ]);
+    }
+
     public function create(): Response
     {
         Gate::authorize('create', Member::class);
@@ -315,6 +376,9 @@ class MemberController extends Controller
             'full_name' => $member->full_name,
             'phone' => $member->phone,
             'email' => $member->email,
+            'dni' => $member->dni,
+            'sex' => $member->sex,
+            'address' => $member->address,
             'role' => $member->role->value,
             'role_label' => $member->role->label(),
             'birth_date' => $member->birth_date?->toDateString(),

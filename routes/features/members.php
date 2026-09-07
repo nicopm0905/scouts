@@ -24,6 +24,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Exportación CSV del censo (antes del resource para que "members/export" no choque con {member}).
     Route::get('members/export', [MemberController::class, 'export'])->name('members.export');
+    Route::get('members/censo-msc', [MemberController::class, 'censusMsc'])->name('members.census-msc');
 
     Route::resource('members', MemberController::class);
 

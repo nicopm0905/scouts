@@ -130,5 +130,33 @@ const maxExpense = computed(() => Math.max(1, ...props.report.expense.map((r) =>
                 <p v-else class="py-6 text-center text-sm text-ink-400">Sin gastos en el periodo.</p>
             </div>
         </div>
+
+        <!-- Presupuesto vs real (por evento) -->
+        <div v-if="report.budgets && report.budgets.length" class="mt-6 card-pad">
+            <h2 class="section-title mb-4">Presupuesto vs. real (por evento)</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead>
+                        <tr class="text-left text-xs uppercase text-ink-400">
+                            <th class="py-2 pr-4">Evento</th>
+                            <th class="py-2 pr-4 text-right">Balance previsto</th>
+                            <th class="py-2 pr-4 text-right">Balance real</th>
+                            <th class="py-2 pr-4 text-right">Desvío</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-ink-100">
+                        <tr v-for="b in report.budgets" :key="b.id">
+                            <td class="py-2 pr-4 text-ink-700">{{ b.event || b.name }}</td>
+                            <td class="py-2 pr-4 text-right text-ink-600">{{ eur(b.expected_balance) }}</td>
+                            <td class="py-2 pr-4 text-right font-medium text-ink-800">{{ eur(b.real_balance) }}</td>
+                            <td class="py-2 pr-4 text-right font-semibold" :class="b.variance < 0 ? 'text-rose-600' : 'text-emerald-600'">
+                                {{ b.variance > 0 ? '+' : '' }}{{ eur(b.variance) }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="mt-2 text-xs text-ink-400">Desvío = balance real − balance previsto. En verde, mejor de lo presupuestado.</p>
+        </div>
     </AppLayout>
 </template>

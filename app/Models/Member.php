@@ -21,16 +21,34 @@ class Member extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'first_name', 'last_name', 'phone', 'email', 'role',
-        'birth_date', 'active', 'joined_at', 'user_id', 'notes',
+        'first_name', 'last_name', 'phone', 'email', 'dni', 'sex', 'address', 'role',
+        'birth_date', 'active', 'joined_at', 'left_at', 'user_id', 'notes',
     ];
 
     protected $casts = [
         'role' => MemberRole::class,
         'birth_date' => 'date',
         'joined_at' => 'date',
+        'left_at' => 'date',
         'active' => 'boolean',
     ];
+
+    protected static function booted(): void
+    {
+        // Mantiene `left_at` sincronizada con el estado activo, sea cual sea el
+        // origen del cambio (edición de ficha, renovación de curso, importador…).
+        static::saving(function (Member $member) {
+            if (! $member->isDirty('active')) {
+                return;
+            }
+
+            if ($member->active === false && $member->left_at === null) {
+                $member->left_at = now()->toDateString();
+            } elseif ($member->active === true) {
+                $member->left_at = null;
+            }
+        });
+    }
 
     /** Trazabilidad RGPD: cambios en datos personales de miembros. */
     public function getActivitylogOptions(): LogOptions

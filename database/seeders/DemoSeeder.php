@@ -63,6 +63,7 @@ class DemoSeeder extends Seeder
                 'email' => $email,
                 'password' => Hash::make('password'),
                 'branches' => $branches,
+                'email_verified_at' => now(),
             ]);
             $user->assignRole($role->value);
         }
@@ -157,6 +158,7 @@ class DemoSeeder extends Seeder
                     'name' => 'Familia '.$family->name,
                     'email' => 'familia@grupo.test',
                     'password' => Hash::make('password'),
+                    'email_verified_at' => now(),
                 ]);
                 $account->assignRole(UserRole::Familia->value);
                 $family->users()->attach($account->id);

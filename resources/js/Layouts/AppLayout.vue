@@ -50,6 +50,7 @@ const sections = computed(() => [
             { label: 'Panel Tesorería', icon: 'chart', route: 'finance.dashboard', permission: null },
             { label: 'Cobros', icon: 'euro', route: 'charges.index', permission: 'charges.view' },
             { label: 'Facturas', icon: 'receipt', route: 'invoices.index', permission: 'invoices.view' },
+            { label: 'Informe económico', icon: 'chart', route: 'finance.report', permission: 'finance.reports' },
         ],
     },
     {
@@ -57,6 +58,7 @@ const sections = computed(() => [
         items: [
             { label: 'Eventos y Salidas', icon: 'calendar', route: 'events.index', permission: 'events.view' },
             { label: 'Plan de rama', icon: 'target', route: 'branch-plans.index', permission: 'plans.view' },
+            { label: 'Memoria del curso', icon: 'file', route: 'reports.annual', permission: 'plans.view' },
             { label: 'Actividades', icon: 'sparkles', route: 'activities.index', permission: 'activities.view' },
             { label: 'Inventario', icon: 'box', route: 'inventory.index', permission: 'inventory.view' },
         ],

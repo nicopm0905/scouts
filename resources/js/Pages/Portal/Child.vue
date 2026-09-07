@@ -9,6 +9,8 @@ const props = defineProps({
     attendance: { type: Object, default: () => ({ present: 0, total: 0 }) },
     guardians: { type: Array, default: () => [] },
     editable: { type: Object, default: () => ({}) },
+    consents: { type: Array, default: () => [] },
+    nextSchoolYear: { type: String, default: '' },
     pendingReview: { type: Object, default: null },
 })
 
@@ -26,6 +28,12 @@ const form = useForm({
         medication: props.editable.medication ?? '',
         observations: props.editable.observations ?? '',
     },
+    family: {
+        contact_phone: props.editable.family_contact_phone ?? '',
+        contact_email: props.editable.family_contact_email ?? '',
+    },
+    consents: Object.fromEntries(props.consents.map((c) => [c.type, c.granted])),
+    renewal_continues: null,
     note: '',
 })
 
@@ -63,24 +71,7 @@ function submit() {
             </div>
         </div>
 
-        <section v-if="guardians.length" class="mt-8">
-            <h2 class="text-lg font-bold text-slate-800">Contacto familiar registrado</h2>
-            <ul class="mt-3 divide-y divide-slate-100 rounded-xl border border-slate-200 bg-white text-sm">
-                <li v-for="(g, i) in guardians" :key="i" class="px-4 py-3">
-                    <span class="font-semibold text-slate-700">{{ g.family }}</span>
-                    <span class="block text-slate-500">
-                        <span v-if="g.phone">{{ g.phone }}</span>
-                        <span v-if="g.phone && g.email"> · </span>
-                        <span v-if="g.email">{{ g.email }}</span>
-                    </span>
-                </li>
-            </ul>
-            <p class="mt-2 text-xs text-slate-400">
-                ¿Los datos de contacto de la familia no son correctos? Escríbelo abajo en "Otra información".
-            </p>
-        </section>
-
-        <!-- Revisión de datos: la familia propone cambios y secretaría los aplica -->
+        <!-- Revisión de datos / campaña de inicio de curso -->
         <section class="mt-8">
             <h2 class="text-lg font-bold text-slate-800">Revisar datos de {{ child.name }}</h2>
 
@@ -89,11 +80,28 @@ function submit() {
                 Puedes volver a enviar el formulario para corregir lo que propusiste.
             </div>
 
-            <form class="mt-4 space-y-5 rounded-xl border border-slate-200 bg-white p-5" @submit.prevent="submit">
+            <form class="mt-4 space-y-6 rounded-xl border border-slate-200 bg-white p-5" @submit.prevent="submit">
                 <p class="text-xs text-slate-500">
-                    Cambia solo lo que esté desactualizado. Nada se guarda hasta que secretaría lo aprueba.
+                    Revisa y corrige lo que esté desactualizado. Nada se guarda hasta que secretaría lo aprueba.
                 </p>
 
+                <!-- Renovación de plaza -->
+                <div v-if="nextSchoolYear" class="rounded-lg bg-slate-50 p-4">
+                    <p class="text-sm font-bold text-slate-700">¿{{ child.name }} continúa el curso {{ nextSchoolYear }}?</p>
+                    <div class="mt-2 flex gap-4 text-sm">
+                        <label class="inline-flex items-center gap-2">
+                            <input type="radio" :value="true" v-model="form.renewal_continues" /> Sí, continúa
+                        </label>
+                        <label class="inline-flex items-center gap-2">
+                            <input type="radio" :value="false" v-model="form.renewal_continues" /> No continúa
+                        </label>
+                        <button type="button" class="text-slate-400 hover:text-slate-600" @click="form.renewal_continues = null">
+                            (dejar sin responder)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Datos del scout -->
                 <div class="grid gap-4 sm:grid-cols-2">
                     <label class="block text-sm">
                         <span class="font-semibold text-slate-700">Teléfono del scout</span>
@@ -106,6 +114,21 @@ function submit() {
                     </label>
                 </div>
 
+                <!-- Contacto de la familia -->
+                <div class="grid gap-4 border-t border-slate-100 pt-4 sm:grid-cols-2">
+                    <p class="sm:col-span-2 text-sm font-bold text-slate-700">Contacto de la familia</p>
+                    <label class="block text-sm">
+                        <span class="font-semibold text-slate-700">Teléfono de la familia</span>
+                        <input v-model="form.family.contact_phone" type="text" class="mt-1 w-full rounded-lg border-slate-300 text-sm" />
+                    </label>
+                    <label class="block text-sm">
+                        <span class="font-semibold text-slate-700">Email de la familia</span>
+                        <input v-model="form.family.contact_email" type="email" class="mt-1 w-full rounded-lg border-slate-300 text-sm" />
+                        <span v-if="form.errors['family.contact_email']" class="text-xs text-rose-600">{{ form.errors['family.contact_email'] }}</span>
+                    </label>
+                </div>
+
+                <!-- Salud -->
                 <div class="space-y-4 border-t border-slate-100 pt-4">
                     <p class="text-sm font-bold text-slate-700">Salud</p>
                     <label class="block text-sm">
@@ -128,16 +151,28 @@ function submit() {
                     </label>
                 </div>
 
+                <!-- Consentimientos -->
+                <div v-if="consents.length" class="space-y-3 border-t border-slate-100 pt-4">
+                    <p class="text-sm font-bold text-slate-700">Consentimientos</p>
+                    <label v-for="c in consents" :key="c.type" class="flex gap-3 rounded-lg border border-slate-200 p-3 text-sm">
+                        <input type="checkbox" v-model="form.consents[c.type]" class="mt-0.5" />
+                        <span>
+                            <span class="font-semibold text-slate-700">{{ c.label }}</span>
+                            <span class="mt-1 block text-xs text-slate-500">{{ c.legal_text }}</span>
+                        </span>
+                    </label>
+                </div>
+
                 <label class="block border-t border-slate-100 pt-4 text-sm">
                     <span class="font-semibold text-slate-700">Otra información para secretaría</span>
                     <textarea v-model="form.note" rows="2" class="mt-1 w-full rounded-lg border-slate-300 text-sm"
-                        placeholder="Ej.: el teléfono de contacto de la familia ha cambiado a…" />
+                        placeholder="Cualquier cosa que quieras aclarar…" />
                 </label>
 
                 <div class="flex justify-end">
                     <button type="submit" :disabled="form.processing"
                         class="rounded-lg bg-emerald-600 px-5 py-2 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-50">
-                        Enviar cambios a secretaría
+                        Enviar a secretaría
                     </button>
                 </div>
             </form>

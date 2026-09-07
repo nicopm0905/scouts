@@ -27,6 +27,15 @@ const calculatedAge = computed(() => {
         <FormField v-model="form.last_name" label="Apellidos" required :error="form.errors.last_name" />
         <FormField v-model="form.phone" label="Teléfono" :error="form.errors.phone" />
         <FormField v-model="form.email" type="email" label="Correo electrónico" :error="form.errors.email" />
+        <FormField v-model="form.dni" label="DNI / NIE (censo MSC)" :error="form.errors.dni" />
+        <FormField
+            v-model="form.sex"
+            type="select"
+            label="Sexo (censo MSC)"
+            :options="[{ value: '', label: '—' }, { value: 'M', label: 'Hombre' }, { value: 'F', label: 'Mujer' }, { value: 'X', label: 'Otro' }]"
+            :error="form.errors.sex"
+        />
+        <FormField v-model="form.address" label="Dirección postal (censo MSC)" :error="form.errors.address" />
         <FormField
             v-model="form.role"
             type="select"

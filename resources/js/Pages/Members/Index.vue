@@ -60,6 +60,7 @@ function destroy(member) {
                 <AppButton :href="route('attendance.index')" size="sm" icon="check">Asistencia</AppButton>
                 <AppButton :href="route('families.index')" size="sm" icon="heart">Familias</AppButton>
                 <AppButton :href="route('members.export')" external size="sm" icon="download">Exportar CSV</AppButton>
+                <AppButton :href="route('members.census-msc')" external size="sm" variant="secondary" icon="download">Censo MSC</AppButton>
                 <AppButton v-if="canImport" :href="route('members.import')" size="sm" icon="upload">Importar CSV</AppButton>
                 <AppButton v-if="canManage" :href="route('members.create')" variant="primary" size="sm" icon="plus">
                     Nuevo miembro
